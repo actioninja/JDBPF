@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<project name="DBPF4J" default="all" basedir=".">
+
+	<echo>Build-Version: 3.4</echo>
+	
+	<!-- ***************************************************************** -->
+	<!-- P R O P E R T I E S                                               -->
+	<!-- ***************************************************************** -->
+	<property name="targetversion" value="1.6" />
+	<property name="manifest.main-class" value=""/>
+	<property name="manifest.class-path" value=""/>
+	<property name="project.version" value="1.3.2"/>
+	<property name="project.name" value="${ant.project.name}"/>
+	<property name="project.vendor" value="Stefan Wertich" />
+	<property name="copyright.message" value="Copyright &#169; 2008-2010 ${project.vendor}. All Rights Reserved."/>
+	<property name="build.dir" value="build/"/>
+	<property name="classes.dir" value="${build.dir}classes"/>
+	<property name="dist.dir" value="dist/"/>
+	<property name="package.dist.dir" value="dist/package/"/>
+	<property name="zip.dist.dir" value="dist/"/>
+	<property name="src.dir" value="src/"/>
+	<property name="lib.dir" value="lib/"/>
+	<property name="doc.dir" value="${build.dir}doc/"/>
+	<property name="jar.filename" value="${project.name}.jar" />
+	<property name="doc.filename" value="${project.name}-${project.version}-doc.zip" />
+	<property name="src.filename" value="${project.name}-${project.version}-src.zip" />
+	<property name="zip.filename" value="${project.name}-${project.version}.zip" />
+	
+	<!-- ***************************************************************** -->
+	<!-- P A T H S                                                         -->
+	<!-- ***************************************************************** -->
+	
+	<!-- later this will not be necessary when the library are created -->
+	<path id="compile.classpath">
+		
+		<!--
+		<fileset dir="${basedir}/${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		-->
+		<!--
+        <fileset dir="../_lib">
+      		<include name="MemoryIO.jar"/>
+            <include name="RXTXcomm.jar"/>
+         </fileset>
+         -->
+	</path>
+
+	
+	<!-- ***************************************************************** -->
+    <!-- C L E A N                                                         -->
+    <!-- ***************************************************************** -->
+	<target name="clean" 
+		description="Removes all temporary files and directories.">
+		<echo>Cleaning ...</echo>
+		
+		<delete failonerror="false" dir="${package.dist.dir}"/>
+		<delete failonerror="false" dir="${build.dir}"/>
+		
+		<echo>Cleaning complete!</echo>
+	</target>
+	
+	<!-- ***************************************************************** -->
+    <!-- P R E P A R A T I O N                                             -->
+    <!-- ***************************************************************** -->
+	<target name="prepare" description="Prepares the build and distribution targets">
+		<echo>Preparing ...</echo>
+		
+		<tstamp>
+           <format property="TIMESTAMP" pattern="yyyy-MM-dd hh:mm:ss" />
+        </tstamp>
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${package.dist.dir}"/>
+		<mkdir dir="${zip.dist.dir}"/>
+		<mkdir dir="${classes.dir}"/>
+		<!--<mkdir dir="${lib.dir}" />-->	
+		<mkdir dir="${doc.dir}"/>
+		<echo>Preparing complete!</echo>
+	</target>
+
+	<!-- ***************************************************************** -->
+    <!-- C O M P I L A T I O N                                             -->
+    <!-- ***************************************************************** -->
+	<target name="compile" depends="prepare"
+		description="Compiles the sources">
+		<echo>Compiling ...</echo>
+		
+		<javac 
+			target="${targetversion}"
+			srcdir="${basedir}/${src.dir}"
+			destdir="${basedir}/${classes.dir}">
+			<classpath refid="compile.classpath"/>
+		</javac>
+		
+		<echo>Compiling complete!</echo>
+	</target>
+	
+	<!-- ***************************************************************** -->
+    <!-- J A V A D O C                                                     -->
+    <!-- ***************************************************************** -->
+	<target name="javadoc" depends="prepare"
+		description="Creates the API documentation using JavaDoc.">
+		<echo>Creating the documentation ...</echo>
+		
+		<javadoc 
+			sourcepath="${src.dir}"
+			destdir="${doc.dir}" 
+			packagenames="*"
+			access="protected"
+			author="true"
+			version="true"
+			use="true"
+			windowtitle="${name} ${project.version} API"
+			doctitle="${name} ${project.version} API"
+			bottom="${copyright.message}">
+			<classpath refid="compile.classpath" />
+		</javadoc>
+		
+		<echo>Documentation complete!</echo>
+	</target>
+	
+	<!-- ***************************************************************** -->
+    <!-- J A R                                       				       -->
+    <!-- ***************************************************************** -->	
+	<target name="jar" depends="compile"
+		description="Creates the JAR archive">
+		
+		<echo>Creating the JAR archive ...</echo>
+		
+		<jar 
+			destfile="${package.dist.dir}/${jar.filename}"
+			compress="true">
+			<fileset dir="${classes.dir}" />
+			<!--
+			<fileset dir="." includes="resources/**"/>
+			-->
+			
+			<manifest>
+				<attribute name ="Built-By" 
+                           value="${user.name}"/>
+         		<attribute name ="Implementation-Title"
+                           value="${project.name}" />
+                <attribute name ="Implementation-Vendor"
+                           value="${project.vendor}" />
+                <attribute name ="Implementation-Version"
+                           value="${project.version} ${TIMESTAMP}" />
+				<!--
+                <attribute name="Main-Class" 
+							value="${manifest.main-class}"/>
+                <attribute name="Class-Path" 
+							value="${manifest.class-path}"/>
+							-->							
+			</manifest>
+		</jar>		
+		<echo>Creating complete!</echo>
+	</target>
+
+	<!-- ***************************************************************** -->
+    <!-- R E S O U R C E S                                                     -->
+    <!-- ***************************************************************** -->
+	<target name="resources" 
+		description="Handle the resources.">
+		
+		<echo>Prepare resources:</echo>
+		<!--
+		<echo>Copy API ...</echo>
+		<copy todir="${package.dist.dir}/api">
+			<fileset dir="${basedir}/api" includes="**/*.pdf" />
+		</copy>
+		-->
+		<!--
+		<echo>Copy data ...</echo>
+		<copy todir="${package.dist.dir}/data">
+			<fileset dir="${basedir}/data" />
+		</copy>
+		-->
+		
+		<!--
+		<echo>Copy images ...</echo>
+		<copy todir="${package.dist.dir}/images">
+			<fileset dir="${basedir}/images" />
+		</copy>
+		-->
+
+		<!--
+		<echo>Copy resources ...</echo>
+		<copy todir="${package.dist.dir}/resources">
+			<fileset dir="${basedir}/resources" />
+		</copy>
+		-->
+		
+		<!--
+		<echo>Copy install ...</echo>
+		<copy todir="${package.dist.dir}/install">
+			<fileset dir="${basedir}/install" />
+		</copy>
+		-->	
+		
+		<echo>Copy other ...</echo>
+		<copy todir="${package.dist.dir}">
+			<fileset dir="${basedir}/other" />
+		</copy>
+		
+		
+		<!--
+		<echo>Copy lib ...</echo>
+		<copy todir="${package.dist.dir}/lib">
+			<path refid="compile.classpath" />
+		</copy>
+		<copy todir="${package.dist.dir}/lib">
+        	<fileset dir="${basedir}/lib" />
+        </copy>
+		-->
+		
+		<!--
+		<echo>Copy lib for XComm ...</echo>
+		<copy todir="${package.dist.dir}">
+			<fileset dir="../_lib/MemoryIO" />
+			<fileset dir="../_lib/RXTX" />
+		</copy>
+		-->
+		
+		<echo>Copy licenses ...</echo>
+		<copy todir="${package.dist.dir}">
+			<fileset dir="${basedir}/license" />
+		</copy>
+				
+		<echo>Copy changelog ...</echo>
+		<copy todir="${package.dist.dir}" file="${basedir}/changelog.html">
+		</copy>
+		
+		<!--
+		<echo>Creating Start.bat</echo>
+		<echo append="false" file="${package.dist.dir}/Start.bat" 
+			message="java -jar ${jar.filename}${line.separator}pause" />
+			-->
+		
+		<echo>Preparing ressources complete</echo>
+	</target>
+	
+	<!-- ***************************************************************** -->
+    <!-- P A C K A G E                                                     -->
+    <!-- ***************************************************************** -->
+	<target name="package" 
+		depends="clean,compile,javadoc,jar,resources"
+		description="Packages the distribution as a zip file.">
+		
+		<echo>Creating ZIP-Distribution</echo>
+		
+		<echo>Creating Sources-Archive (src)...</echo>
+		<zip 
+			destfile="${dist.dir}/${src.filename}" 
+			basedir="${basedir}/${src.dir}" 
+		/>
+		
+		<echo>Packaging the documentation (javadoc)...</echo>
+		<zip 
+			destfile="${dist.dir}/${doc.filename}" 
+			basedir="${basedir}/${doc.dir}">
+		</zip>
+		
+		<echo>Creating ZIP-Distribution (package)...</echo>
+        <zip 
+        	destfile="${zip.dist.dir}/${zip.filename}" 
+        	basedir="${package.dist.dir}">
+        </zip>
+        		
+        <echo>Distribution complete!</echo>
+		
+		<echo>Clean up...</echo>
+		<echo>Delete build directory!</echo>
+		<delete failonerror="false" dir="${build.dir}"/>		
+	</target>
+	
+    <!-- ***************************************************************** -->
+    <!-- A L L                                                      -->
+    <!-- ***************************************************************** -->
+	<target name="all" depends="package"
+		description="Package all.">
+
+		<echo>Copy distribution to _lib directory</echo>
+	  	<copy overwrite="true" file="${package.dist.dir}${jar.filename}" todir="../_lib/" />
+		<copy overwrite="true" file="${zip.dist.dir}${src.filename}" todir="../_lib/" />
+	</target>	
+</project>

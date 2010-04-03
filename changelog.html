@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/transitional.dtd">
+
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+		<title>Project DBPF4J</title>
+	</head>
+	<body>
+		<h1>Projectinformation</h1>
+		<hr>
+		<table border="0">
+			<tr>
+				<th align="left" valign="top">Title:</th>
+				<td align="left" valign="top">
+					DBPF4J
+				</td>
+			</tr>
+			<tr>
+				<th align="left" valign="top">Author:</th>
+				<td align="left" valign="top">
+					Stefan Wertich
+				</td>
+			</tr>
+			<tr>
+				<th align="left" valign="top">Organization:</th>
+				<td align="left" valign="top">
+					SSP
+				</td>
+			</tr>
+				<tr><th align="left" valign="top">Description:</th>
+				<td align="left" valign="top">
+					DBPF for Java
+				</td>
+			</tr>
+		</table>
+		<hr>
+		<h2>Necessary Packages</h2>
+		<ol>
+			<li>JAVA 6</li>
+		</ol>
+		<h2>Roadmap</h2>
+		<ol>
+			<li>_</li>
+		</ol>
+		<h2>Version 1.3.2, 02.04.2010</h2>
+		<ol>
+			<li>UPDATE Some minor updates of readme, resources and build</li>
+		</ol>
+		<h2>Version 1.3.1, 20.01.2010</h2>
+		<ol>
+			<li>ADD DBPFWriter.write now returns boolean, if successful written</li>
+		</ol>
+		<h2>Version 1.3.0, 22.11.2009</h2>
+		<ol>
+			<li>ADD DBPFProperties.ITEM_BUTTON_ID</li>
+			<li>CHANGE DBPFConverter has now only static methods</li>
+			<li>REMOVE Some method from DBPFUtil to DBPFUtil2 in DBPF4J-Ext</li>
+		</ol>
+		<h2>Version 1.2.5, 16.09.2009</h2>
+		<ol>
+			<li>REMOVE deprecated DBPFUtil.getDataTypeLength,getDataType</li>
+			<li>FIX DBPFCoder.createPropertyB: Added Uint16 type</li>
+		</ol>
+		<h2>Version 1.2.4, 08.09.2009</h2>
+		<ol>
+			<li>FIX DBPFConverter.updateDirectory: Will not create a IID for directory</li>
+			<li>FIX DBPFEntries: DIR has TGI:0xE86B1EEF,0xE86B1EEF,0x286B1F03</li>
+		</ol>
+		<h2>Version 1.2.3, 06.09.2009</h2>
+		<ol>
+			<li>FIX DBPFCoder: RepSize will ever true for DataType String (Lot-Bug)</li>
+		</ol>
+		<h2>Version 1.2.2, 04.09.2009</h2>
+		<ol>
+			<li>REMOVE DBPFOccupantGroups: not needed directly for DBPF4J</li>
+		</ol>
+		<h2>Version 1.2.1, 02.09.2009</h2>
+		<ol>
+			<li>FIX DBPFUtil.searchProperty: fix error if exemplar is null</li>
+		</ol>		
+		<h2>Version 1.2.0, 31.08.2009</h2>
+		<ol>
+			<li>ADD Some more names to occupantGroups.xml</li>
+			<li>ADD DBPFUtil.getLongValue,getFloatValue,getStringValue(Property)</li>
+			<li>ADD DBPFUtil.setLongValue,setFloatValue,setStringValue</li>
+			<li>CHANGE Rename LOT_RESSOURCE_KEY to LOT_RESOURCE_KEY</li>
+			<li>ADD Resources: occupantgroups.xml and properties.xml</li>
+			<li>ADD properties.DBPFOccupantGroups for handling occupant groups</li>	
+			<li>ADD DBPFProperties.getString,getKey</li>
+			<li>REMOVE constant datatype from DBPFProperties</li>
+			<li>ADD properties.DBPFPropertyDataTypes with property datatypes</li>
+			<li>CHANGE DBPFUtil.getTGIType changed to DBPFEntries.getString</li>
+			<li>FIX Bug in DBPFCoder.getUint32, if LTEXT length is lesser than 3</li>
+			<li>FIX Bug in special case, when decompressed size is not correct</li>
+			<li>ADD WAV type to prevent errors, same TID as LTEXT: DBPFEntries,DBPFTypes,DBPFConverter,DBPFUtil</li>
+			<li>ADD DBPFUtil.createLongProperty, createFloatProperty, createStringProperty</li>
+		</ol>
+		<h2>Version 1.1.2, 17.03.2009</h2>
+		<ol>
+			<li>FIX DBPFRUL returns the wrong type LUA</li>
+		</ol>
+		<h2>Version 1.1.1, 27.02.2009</h2>
+		<ol>
+			<li>UPDATE DBPFCoder.createExemplarT,createPropertyT: better handling of wrong data</li>
+		</ol>
+		<h2>Version 1.1.0, 26.02.2009</h2>
+		<ol>
+			<li>ADD DBPFUTIL.FORMAT_BINARY,FORMAT_TEXT replace the MAGICNUMBER_B_FORMAT,T_FORMAT</li>
+			<li>ADD DBPFCoder: RUL</li>
+			<li>ADD DBPFConverter: RUL, FSH(only RAW!), S3D(only RAW!)</li>
+			<li>ADD DBPFTypes: RUL, FSH, S3D</li>
+			<li>ADD types.DBPFRUL,DBPFFSH(only RAW!),DBPFS3D(only RAW!)</li>
+			<li>ADD DBPFEntries: RUL, FSH, S3D</li>
+			<li>FIX DBPFCoder: createPropertyTData, Boolean set now True/False instead of 0x01/0x00</li> 
+			<li>FIX floatToHex, hexToFloat replaced with JAVA function for faster 
+			converting and negative values</li>
+		</ol>
+		<h2>Version 1.0.6, 23.02.2009</h2>
+		<ol>
+			<li>FIX floatToHex when float value is negative fixed</li>
+		</ol>
+		<h2>Version 1.0.5, 17.02.2009</h2>
+		<ol>
+			<li>ADD DBPFCoder: T-Format, use DBPFProperties.propertyList, else UNKNOWN</li>
+			<li>ADD DBPFproperties: PropertyList</li>
+		</ol>
+		<h2>Version 1.0.4, 15.02.2009</h2>
+		<ol>
+			<li>FIX DBPFCoder.createLText: Recognize Unicode and ASCII text</li>
+		</ol>
+		<h2>Version 1.0.3, 09.02.2009</h2>
+		<ol>
+			<li>FIX DBPFConverter.updateDirectory</li>
+			<li>ADD DBPFProperties: UNKNOWN</li>
+			<li>FIX DBPFUtil.calcPropertyDataLength take repSize not rep</li>
+			<li>ADD DBPFUtil.getLongValue,getBooleanValue,removeProperty,updateProperty</li>
+			<li>FIX DBPFCoder.createPropertyDataB: fix rep</li>
+			<li>CHANGE DBPFXXXProperty updated, Interface: updateRepSize, Redesigned</li>
+			<li>ADD DBPFPackager.isCompressed</li>
+		</ol>
+		<h2>Version 1.0.2, 05.02.2009</h2>
+		<ol>
+			<li>ADD DBPFProperties: some more added</li>
+			<li>ADD DBPFReader.checkFileType</li>
+		</ol>
+		<h2>Version 1.0.1, 03.02.2009</h2>
+		<ol>
+			<li>FIX DBPFCoder.createPropertyDataB: Boolean fixes</li>
+			<li>ADD DBPFUtil.addProperty</li>
+			<li>ADD DBPFProperties: CONDITIONAL_BUILDING</li>
+			<li>FIX DBPFConverter.updateDirectory: Insert directory file correct</li>
+			<li>FIX DBPFPackager.compress: Fix problem with PNGs</li>
+		</ol>
+		<h2>Version 1.0.0, 30.01.2009</h2>
+		<ol>
+			<li>ADD DBPFConverter can create LUA types, static create of EXEMPLAR,PNG,LTEXT</li>
+			<li>ADD many methods to DBPFUtil</li>
+			<li>ADD io.ArrayInputStream, ArrayOutputStream</li>
+			<li>ADD Property 0x0200=Uint16 to various methods</li>
+			<li>FIX TGI of LText now correct tid,-1,-1</li>
+		</ol>
+		<h2>Version 0.9.1.27, 27.01.2009</h2>
+		<ol>
+			<li>ADD Add and remove of properties available in exemplars</li>
+			<li>FIX T-Format exemplars will be DBPFRaw since implemented</li>
+			<li>FIX Updated the decompressedSize in all types</li>
+			<li>ADD DBPFPackager.compress integrated</li>
+		</ol>
+		<h2>Version 0.9.1.26, 26.01.2009</h2>
+		<ol>
+			<li>ADD types.DBPFLTEXT and DBPFLUA added</li>
+			<li>REMOVE Package XTool no longer needed</li>
+			<li>ADD Adding of entries to writeList, update of directory automatically</li> 
+			<li>FIX LText with correct TGI</li>
+			<li>ADD util.DBPFCoder: Decode, Encode types</li>
+			<li>ADD util.DBPFPackager: Decompress, (compress) entries</li>
+			<li>REMOVE type.DBPFTypeFactory: replaced by DBPFConverter</li>
+			<li>ADD util.DBPFConverter: converts between Type,Entry,RawData</li>
+			<li>ADD types.DBPFType.getType: Returns the type</li>
+			<li>ADD types.DBPFTypes: Available DBPFTypes</li>
+			<li>ADD types.DBPFEntries: Available DBPFEntrys</li>
+			<li>UPDATE util.DBPFUtil: isTGI</li>
+		</ol>
+		<h2>Version 0.9.1.20, 20.01.2009</h2>
+		<ol>
+			<li>Startet separate project for DBPF support for JAVA</li>
+		</ol>
+	</body>
+</html>
