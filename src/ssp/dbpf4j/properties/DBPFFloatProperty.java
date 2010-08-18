@@ -14,19 +14,38 @@ public class DBPFFloatProperty implements DBPFProperty {
 	private long nameValue;
 	private short dataType;
 	private float[] value;
-	private boolean rep;
+	private boolean rep = true;
 
 	
 	/**
 	 * Constructor.<br>
 	 */
 	public DBPFFloatProperty() {
-		nameValue = DBPFProperties.UNKNOWN;
-		dataType = DBPFDataTypes.DATATYPE_FLOAT32;
-		value = new float[0];
-		rep = true;
+		this(DBPFProperties.UNKNOWN, DBPFDataTypes.FLOAT32, new float[0]);
+	}
+	
+	/**
+	 * Constructor.<br>
+	 * 
+	 * @param nameValue
+	 *            The nameValue
+	 * @param dataType
+	 *            The dataType
+	 * @param values
+	 *            The values
+	 */
+	public DBPFFloatProperty(long nameValue, short dataType, float[] values) {
+		this.nameValue = nameValue;
+		this.dataType = dataType;
+		if (values != null) {
+			updateCount(values.length, false);
+			for (int i = 0; i < values.length; i++) {
+				setFloat(values[i], i);
+			}
+		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("NameValue: " + DBPFUtil.toHex(nameValue, 8));
@@ -84,7 +103,7 @@ public class DBPFFloatProperty implements DBPFProperty {
 	}
 	
 	@Override
-	public void updateRepSize(int repSize, boolean copy) {
+	public void updateCount(int repSize, boolean copy) {
 		float[] temp = new float[repSize];
 		if (copy && repSize > 0) {
 			int min = Math.min(value.length, repSize);
@@ -99,17 +118,17 @@ public class DBPFFloatProperty implements DBPFProperty {
 	}
 
 	@Override
-	public long getNameValue() {
+	public long getID() {
 		return nameValue;
 	}
 
 	@Override
-	public int getRepSize() {
+	public int getCount() {
 		return value.length;
 	}
 
 	@Override
-	public void setNameValue(long nameValue) {
+	public void setID(long nameValue) {
 		this.nameValue = nameValue;
 	}
 	
@@ -119,12 +138,12 @@ public class DBPFFloatProperty implements DBPFProperty {
 	}
 	
 	@Override
-	public boolean isRep() {
+	public boolean hasCount() {
 		return rep;
 	}
 
 	@Override
-	public void setRep(boolean rep) {
+	public void setHasCount(boolean rep) {
 		this.rep = rep;		
 	}
 }

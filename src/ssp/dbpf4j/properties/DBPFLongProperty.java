@@ -6,27 +6,46 @@ import ssp.dbpf4j.util.DBPFUtil;
  * Defines a long property.<br>
  * 
  * @author Stefan Wertich
- * @version 1.0.3, 07.02.2009
+ * @version 1.4.0, 18.08.2010
  * 
  */
 public class DBPFLongProperty implements DBPFProperty {
 
 	private long nameValue;
 	private short dataType;
-	private long[] value;
-	private boolean rep;
-	
+	private long[] values;
+	private boolean rep = true;
+
 	/**
 	 * Constructor.<br>
 	 * 
 	 */
 	public DBPFLongProperty() {
-		nameValue = DBPFProperties.UNKNOWN;
-		dataType = DBPFDataTypes.DATATYPE_UINT32;
-		value = new long[0];
-		rep = true;
+		this(DBPFProperties.UNKNOWN, DBPFDataTypes.UINT32, new long[0]);
 	}
 
+	/**
+	 * Constructor.<br>
+	 * 
+	 * @param nameValue
+	 *            The nameValue
+	 * @param dataType
+	 *            The dataType
+	 * @param values
+	 *            The values
+	 */
+	public DBPFLongProperty(long nameValue, short dataType, long[] values) {
+		this.nameValue = nameValue;
+		this.dataType = dataType;
+		if (values != null) {
+			updateCount(values.length, false);
+			for (int i = 0; i < values.length; i++) {
+				setLong(values[i], i);
+			}
+		}
+	}
+
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("NameValue: " + DBPFUtil.toHex(nameValue, 8));
@@ -35,12 +54,12 @@ public class DBPFLongProperty implements DBPFProperty {
 		sb.append(",");
 		sb.append("Rep: " + rep);
 		sb.append(",");
-		sb.append("RepSize: " + value.length);
-		if (value.length > 0) {
+		sb.append("RepSize: " + values.length);
+		if (values.length > 0) {
 			sb.append(",");
 			sb.append("Values: ");
-			for (int i = 0; i < value.length; i++) {
-				sb.append(DBPFUtil.toHex(value[i], 8));
+			for (int i = 0; i < values.length; i++) {
+				sb.append(DBPFUtil.toHex(values[i], 8));
 				sb.append(" ");
 			}
 		}
@@ -59,7 +78,7 @@ public class DBPFLongProperty implements DBPFProperty {
 	 */
 	public long getLong(int index) {
 		try {
-			return value[index];
+			return values[index];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return 0;
 		}
@@ -76,7 +95,7 @@ public class DBPFLongProperty implements DBPFProperty {
 	 */
 	public boolean setLong(long val, int index) {
 		try {
-			value[index] = val;
+			values[index] = val;
 			return true;
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return false;
@@ -84,13 +103,13 @@ public class DBPFLongProperty implements DBPFProperty {
 	}
 
 	@Override
-	public void updateRepSize(int repSize, boolean copy) {
+	public void updateCount(int repSize, boolean copy) {
 		long[] temp = new long[repSize];
 		if (copy && repSize > 0) {
-			int min = Math.min(value.length, repSize);
-			System.arraycopy(value, 0, temp, 0, min);
+			int min = Math.min(values.length, repSize);
+			System.arraycopy(values, 0, temp, 0, min);
 		}
-		this.value = temp;
+		this.values = temp;
 	}
 
 	@Override
@@ -99,17 +118,17 @@ public class DBPFLongProperty implements DBPFProperty {
 	}
 
 	@Override
-	public long getNameValue() {
+	public long getID() {
 		return nameValue;
 	}
 
 	@Override
-	public int getRepSize() {
-		return value.length;
+	public int getCount() {
+		return values.length;
 	}
 
 	@Override
-	public void setNameValue(long nameValue) {
+	public void setID(long nameValue) {
 		this.nameValue = nameValue;
 	}
 
@@ -117,14 +136,14 @@ public class DBPFLongProperty implements DBPFProperty {
 	public void setDataType(short dataType) {
 		this.dataType = dataType;
 	}
-	
+
 	@Override
-	public boolean isRep() {
+	public boolean hasCount() {
 		return rep;
 	}
 
 	@Override
-	public void setRep(boolean rep) {
-		this.rep = rep;		
+	public void setHasCount(boolean rep) {
+		this.rep = rep;
 	}
 }

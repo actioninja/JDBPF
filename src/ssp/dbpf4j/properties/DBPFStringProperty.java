@@ -8,7 +8,7 @@ import ssp.dbpf4j.util.DBPFUtil;
  * The string internal consists of a chars array.
  * 
  * @author Stefan Wertich
- * @version 1.0.3, 07.02.2009
+ * @version 1.4.0, 18.08.2010
  * 
  */
 public class DBPFStringProperty implements DBPFProperty {
@@ -16,18 +16,35 @@ public class DBPFStringProperty implements DBPFProperty {
 	private long nameValue;
 	private short dataType;
 	private char[] value;
-	private boolean rep;
+	private boolean rep = true;
 
 	/**
 	 * Constructor.<br>
 	 */
 	public DBPFStringProperty() {
-		nameValue = DBPFProperties.UNKNOWN;
-		dataType = DBPFDataTypes.DATATYPE_STRING;
-		value = new char[0];
-		rep = true;
+		this(DBPFProperties.UNKNOWN, DBPFDataTypes.STRING, "");
 	}
 
+	/**
+	 * Constructor.<br>
+	 * 
+	 * @param nameValue
+	 *            The nameValue
+	 * @param dataType
+	 *            The dataType
+	 * @param values
+	 *            The values
+	 */
+	public DBPFStringProperty(long nameValue, short dataType, String values) {
+		this.nameValue = nameValue;
+		this.dataType = dataType;
+		if (values != null) {
+			// updateCount(value.length(), false); not necessary
+			setString(values);
+		}
+	}
+
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("NameValue: " + DBPFUtil.toHex(nameValue, 8));
@@ -66,12 +83,23 @@ public class DBPFStringProperty implements DBPFProperty {
 	 */
 	public void setString(String s) {
 		value = new char[s.length()];
-		s.getChars(0, s.length(), value, 0);
+		if (s.length() > 0) {
+			s.getChars(0, s.length(), value, 0);
+		}
 	}
-	
+
+	/**
+	 * Returns the length of the string.<br>
+	 * 
+	 * @return The length
+	 */
+	public int getLength() {
+		return value.length;
+	}
+
 	@Override
-	public void updateRepSize(int repSize, boolean copy) {
-		// do nothing, cause this will be done with setString		
+	public void updateCount(int repSize, boolean copy) {
+		// do nothing, cause this will be done with setString
 	}
 
 	@Override
@@ -80,17 +108,17 @@ public class DBPFStringProperty implements DBPFProperty {
 	}
 
 	@Override
-	public long getNameValue() {
+	public long getID() {
 		return nameValue;
 	}
 
 	@Override
-	public int getRepSize() {
+	public int getCount() {
 		return value.length;
 	}
 
 	@Override
-	public void setNameValue(long nameValue) {
+	public void setID(long nameValue) {
 		this.nameValue = nameValue;
 	}
 
@@ -100,12 +128,12 @@ public class DBPFStringProperty implements DBPFProperty {
 	}
 
 	@Override
-	public boolean isRep() {
+	public boolean hasCount() {
 		return rep;
 	}
 
 	@Override
-	public void setRep(boolean rep) {
-		this.rep = rep;		
+	public void setHasCount(boolean rep) {
+		this.rep = rep;
 	}
 }

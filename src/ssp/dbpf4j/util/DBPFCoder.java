@@ -165,7 +165,7 @@ public class DBPFCoder {
 
 		boolean rep = false;
 		int repSize = 1;
-		if (repLong == 0x80 || dataType == DBPFDataTypes.DATATYPE_STRING) {
+		if (repLong == 0x80 || dataType == DBPFDataTypes.STRING) {
 			rep = true;
 			repSize = (int) DBPFUtil.getUint32(dData, pos, 4);
 			pos += 4;
@@ -175,26 +175,26 @@ public class DBPFCoder {
 //		 + DBPFUtil.toHex(repLong, 2) + "RepSize: " + repSize);
 
 		// check the dataType
-		if (dataType == DBPFDataTypes.DATATYPE_STRING) {
+		if (dataType == DBPFDataTypes.STRING) {
 			DBPFStringProperty prop = new DBPFStringProperty();
-			prop.setNameValue(nameValue);
+			prop.setID(nameValue);
 			prop.setDataType(dataType);
-			prop.updateRepSize(repSize, false);
-			prop.setRep(rep);
+			prop.updateCount(repSize, false);
+			prop.setHasCount(rep);
 			prop.setString(DBPFUtil.getChars(dData, pos, repSize));
 			pos += repSize;
 			return prop;
-		} else if (dataType == DBPFDataTypes.DATATYPE_UINT8
-				|| dataType == DBPFDataTypes.DATATYPE_UINT16
-				|| dataType == DBPFDataTypes.DATATYPE_UINT32
-				|| dataType == DBPFDataTypes.DATATYPE_SINT32
-				|| dataType == DBPFDataTypes.DATATYPE_SINT64
-				|| dataType == DBPFDataTypes.DATATYPE_BOOLEAN) {
+		} else if (dataType == DBPFDataTypes.UINT8
+				|| dataType == DBPFDataTypes.UINT16
+				|| dataType == DBPFDataTypes.UINT32
+				|| dataType == DBPFDataTypes.SINT32
+				|| dataType == DBPFDataTypes.SINT64
+				|| dataType == DBPFDataTypes.BOOLEAN) {
 			DBPFLongProperty prop = new DBPFLongProperty();
-			prop.setNameValue(nameValue);
+			prop.setID(nameValue);
 			prop.setDataType(dataType);
-			prop.updateRepSize(repSize, false);
-			prop.setRep(rep);
+			prop.updateCount(repSize, false);
+			prop.setHasCount(rep);
 			int length = DBPFDataTypes.getLength(dataType);
 			for (int i = 0; i < repSize; i++) {
 				long val = DBPFUtil.getUint32(dData, pos, length);
@@ -202,12 +202,12 @@ public class DBPFCoder {
 				pos += length;
 			}
 			return prop;
-		} else if (dataType == DBPFDataTypes.DATATYPE_FLOAT32) {
+		} else if (dataType == DBPFDataTypes.FLOAT32) {
 			DBPFFloatProperty prop = new DBPFFloatProperty();
-			prop.setNameValue(nameValue);
+			prop.setID(nameValue);
 			prop.setDataType(dataType);
-			prop.updateRepSize(repSize, false);
-			prop.setRep(rep);
+			prop.updateCount(repSize, false);
+			prop.setHasCount(rep);
 			int length = DBPFDataTypes.getLength(dataType);
 			for (int i = 0; i < repSize; i++) {
 				float val = DBPFUtil.getFloat32(dData, pos, length);
@@ -233,11 +233,11 @@ public class DBPFCoder {
 	 */
 	public static int getPropertyBLength(DBPFProperty prop) {
 		int length = 9;
-		if (prop.isRep()) {
+		if (prop.hasCount()) {
 			length += 4;
 		}
 		int dataTypeLength = DBPFDataTypes.getLength(prop.getDataType());
-		length += (prop.getRepSize() * dataTypeLength);
+		length += (prop.getCount() * dataTypeLength);
 		return length;
 	}
 
@@ -317,23 +317,23 @@ public class DBPFCoder {
 		String[] values = s.trim().split(",");
 
 		// check the dataType
-		if (dataType == DBPFDataTypes.DATATYPE_STRING) {
+		if (dataType == DBPFDataTypes.STRING) {
 			String val = s.trim();
 			DBPFStringProperty prop = new DBPFStringProperty();
 			prop.setDataType(dataType);
-			prop.setNameValue(nameValue);
-			prop.setRep(true);
+			prop.setID(nameValue);
+			prop.setHasCount(true);
 			prop.setString(val);
 			return prop;
-		} else if (dataType == DBPFDataTypes.DATATYPE_UINT8
-				|| dataType == DBPFDataTypes.DATATYPE_UINT32
-				|| dataType == DBPFDataTypes.DATATYPE_SINT32
-				|| dataType == DBPFDataTypes.DATATYPE_SINT64) {
+		} else if (dataType == DBPFDataTypes.UINT8
+				|| dataType == DBPFDataTypes.UINT32
+				|| dataType == DBPFDataTypes.SINT32
+				|| dataType == DBPFDataTypes.SINT64) {
 			DBPFLongProperty prop = new DBPFLongProperty();
-			prop.updateRepSize(repSize, false);
+			prop.updateCount(repSize, false);
 			prop.setDataType(dataType);
-			prop.setNameValue(nameValue);
-			prop.setRep(rep);
+			prop.setID(nameValue);
+			prop.setHasCount(rep);
 			for (int i = 0; i < values.length; i++) {
 				if (values[i].length() > 0) {
 					String val = values[i].trim();
@@ -346,22 +346,22 @@ public class DBPFCoder {
 				}
 			}
 			return prop;
-		} else if (dataType == DBPFDataTypes.DATATYPE_FLOAT32) {
+		} else if (dataType == DBPFDataTypes.FLOAT32) {
 			DBPFFloatProperty prop = new DBPFFloatProperty();
-			prop.setNameValue(nameValue);
+			prop.setID(nameValue);
 			prop.setDataType(dataType);
-			prop.updateRepSize(repSize, false);
-			prop.setRep(rep);
+			prop.updateCount(repSize, false);
+			prop.setHasCount(rep);
 			for (int i = 0; i < values.length; i++) {
 				prop.setFloat(Float.parseFloat(values[i].trim()), i);
 			}
 			return prop;
-		} else if (dataType == DBPFDataTypes.DATATYPE_BOOLEAN) {
+		} else if (dataType == DBPFDataTypes.BOOLEAN) {
 			DBPFLongProperty prop = new DBPFLongProperty();
-			prop.updateRepSize(repSize, false);
+			prop.updateCount(repSize, false);
 			prop.setDataType(dataType);
-			prop.setNameValue(nameValue);
-			prop.setRep(rep);
+			prop.setID(nameValue);
+			prop.setHasCount(rep);
 			for (int i = 0; i < values.length; i++) {
 				long val = 0x00;
 				if (values[i].trim().toLowerCase().equals("true") ||
@@ -553,10 +553,10 @@ public class DBPFCoder {
 	private static short[] createPropertyDataB(DBPFProperty prop) {
 		int dataLength = calcPropertyBLength(prop);
 		short[] data = new short[dataLength];
-		long nameValue = prop.getNameValue();
+		long nameValue = prop.getID();
 		short dataType = prop.getDataType();
-		long repSize = prop.getRepSize();
-		boolean rep = prop.isRep();
+		long repSize = prop.getCount();
+		boolean rep = prop.hasCount();
 
 		int start = 9;
 		if (rep) {
@@ -575,24 +575,24 @@ public class DBPFCoder {
 		DBPFUtil.setUint32(0x00, data, 7, 2);
 
 		// check the dataType
-		if (dataType == DBPFDataTypes.DATATYPE_STRING) {
+		if (dataType == DBPFDataTypes.STRING) {
 			DBPFStringProperty p = (DBPFStringProperty) prop;
 			DBPFUtil.setChars(p.getString(), data, start);
-		} else if (dataType == DBPFDataTypes.DATATYPE_UINT8
-				|| dataType == DBPFDataTypes.DATATYPE_UINT32
-				|| dataType == DBPFDataTypes.DATATYPE_SINT32
-				|| dataType == DBPFDataTypes.DATATYPE_SINT64
-				|| dataType == DBPFDataTypes.DATATYPE_BOOLEAN) {
+		} else if (dataType == DBPFDataTypes.UINT8
+				|| dataType == DBPFDataTypes.UINT32
+				|| dataType == DBPFDataTypes.SINT32
+				|| dataType == DBPFDataTypes.SINT64
+				|| dataType == DBPFDataTypes.BOOLEAN) {
 			DBPFLongProperty p = (DBPFLongProperty) prop;
 			int pos = start;
-			for (int i = 0; i < p.getRepSize(); i++) {
+			for (int i = 0; i < p.getCount(); i++) {
 				DBPFUtil.setUint32(p.getLong(i), data, pos, dataTypeLength);
 				pos += dataTypeLength;
 			}
-		} else if (dataType == DBPFDataTypes.DATATYPE_FLOAT32) {
+		} else if (dataType == DBPFDataTypes.FLOAT32) {
 			DBPFFloatProperty p = (DBPFFloatProperty) prop;
 			int pos = start;
-			for (int i = 0; i < p.getRepSize(); i++) {
+			for (int i = 0; i < p.getCount(); i++) {
 				DBPFUtil.setFloat32(p.getFloat(i), data, pos, dataTypeLength);
 				pos += dataTypeLength;
 			}
@@ -614,16 +614,16 @@ public class DBPFCoder {
 	 */
 	private static String createPropertyDataT(DBPFProperty prop) {
 		short dataType = prop.getDataType();
-		int repSize = prop.getRepSize();
-		if (dataType == DBPFDataTypes.DATATYPE_STRING) {
+		int repSize = prop.getCount();
+		if (dataType == DBPFDataTypes.STRING) {
 			repSize = 0;
 		}
 
 		StringBuffer sb = new StringBuffer();
 		sb.append("0x");
-		sb.append(DBPFUtil.toHex(prop.getNameValue(), 8));
+		sb.append(DBPFUtil.toHex(prop.getID(), 8));
 		sb.append(":{\"");
-		String propName = DBPFProperties.propertyList.get(prop.getNameValue());
+		String propName = DBPFProperties.propertyList.get(prop.getID());
 		if (propName == null) {
 			propName = "UNKNOWN";
 		}
@@ -633,19 +633,19 @@ public class DBPFCoder {
 		sb.append(":");
 		sb.append(repSize);
 		sb.append(":{");
-		if (dataType == DBPFDataTypes.DATATYPE_STRING) {
+		if (dataType == DBPFDataTypes.STRING) {
 			DBPFStringProperty p = (DBPFStringProperty) prop;
 			sb.append("\"");
 			sb.append(p.getString());
 			sb.append("\"");
 			sb.append("}");
-		} else if (dataType == DBPFDataTypes.DATATYPE_UINT8
-				|| dataType == DBPFDataTypes.DATATYPE_UINT16
-				|| dataType == DBPFDataTypes.DATATYPE_UINT32
-				|| dataType == DBPFDataTypes.DATATYPE_SINT32
-				|| dataType == DBPFDataTypes.DATATYPE_SINT64) {
+		} else if (dataType == DBPFDataTypes.UINT8
+				|| dataType == DBPFDataTypes.UINT16
+				|| dataType == DBPFDataTypes.UINT32
+				|| dataType == DBPFDataTypes.SINT32
+				|| dataType == DBPFDataTypes.SINT64) {
 			DBPFLongProperty p = (DBPFLongProperty) prop;
-			for (int i = 0; i < p.getRepSize(); i++) {
+			for (int i = 0; i < p.getCount(); i++) {
 				String s = DBPFUtil.toHex(p.getLong(i), 2 * DBPFDataTypes
 						.getLength(p.getDataType()));
 				sb.append("0x");
@@ -653,16 +653,16 @@ public class DBPFCoder {
 				sb.append(",");
 			}
 			sb.replace(sb.length() - 1, sb.length(), "}");
-		} else if (dataType == DBPFDataTypes.DATATYPE_FLOAT32) {
+		} else if (dataType == DBPFDataTypes.FLOAT32) {
 			DBPFFloatProperty p = (DBPFFloatProperty) prop;
-			for (int i = 0; i < p.getRepSize(); i++) {
+			for (int i = 0; i < p.getCount(); i++) {
 				sb.append(p.getFloat(i));
 				sb.append(",");
 			}
 			sb.replace(sb.length() - 1, sb.length(), "}");
-		} else if (dataType == DBPFDataTypes.DATATYPE_BOOLEAN) {
+		} else if (dataType == DBPFDataTypes.BOOLEAN) {
 			DBPFLongProperty p = (DBPFLongProperty) prop;
-			for (int i = 0; i < p.getRepSize(); i++) {
+			for (int i = 0; i < p.getCount(); i++) {
 				String s = "False";
 				if (p.getLong(i) == 0x01) {
 					s = "True";
@@ -705,10 +705,10 @@ public class DBPFCoder {
 	 */
 	public static int calcPropertyBLength(DBPFProperty prop) {
 		boolean rep = true;
-		if (prop.getRepSize() == 1 && !prop.isRep()) {
+		if (prop.getCount() == 1 && !prop.hasCount()) {
 			rep = false;
 		}
-		prop.setRep(rep);
+		prop.setHasCount(rep);
 		return getPropertyBLength(prop);
 	}
 }

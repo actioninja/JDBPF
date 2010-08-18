@@ -16,7 +16,7 @@ package ssp.dbpf4j.properties;
  * </ol>
  * 
  * @author Stefan Wertich
- * @version 1.0.3, 06.02.2009
+ * @version 1.4.0, 18.08.2010
  * 
  */
 public interface DBPFProperty {
@@ -24,12 +24,12 @@ public interface DBPFProperty {
 	 * @param nameValue
 	 *            The nameValue to set
 	 */
-	public void setNameValue(long nameValue);
+	public void setID(long nameValue);
 
 	/**
 	 * @return the nameValue
 	 */
-	public long getNameValue();
+	public long getID();
 	
 	/**
 	 * @return the dataType
@@ -47,7 +47,7 @@ public interface DBPFProperty {
 	 * 
 	 * @return The repSize
 	 */
-	public int getRepSize();
+	public int getCount();
 
 	
 	/**
@@ -60,7 +60,7 @@ public interface DBPFProperty {
 	 * @param copy
 	 *            TRUE, if copy from previous array; FALSE, otherwise
 	 */
-	public void updateRepSize(int repSize, boolean copy);
+	public void updateCount(int repSize, boolean copy);
 	
 	/**
 	 * Return the rep.<br>
@@ -68,10 +68,10 @@ public interface DBPFProperty {
 	 * For writing determine this new!
 	 * @return The rep
 	 */
-	public boolean isRep();
+	public boolean hasCount();
 	
 	/**
 	 * @param rep The rep to set
 	 */
-	public void setRep(boolean rep);
+	public void setHasCount(boolean rep);
 }
