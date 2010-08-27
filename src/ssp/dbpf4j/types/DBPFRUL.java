@@ -1,7 +1,5 @@
 package ssp.dbpf4j.types;
 
-import ssp.dbpf4j.util.DBPFUtil;
-
 /**
  * Defines a RUL of DBPF.<br>
  * 
@@ -9,40 +7,30 @@ import ssp.dbpf4j.util.DBPFUtil;
  * The decompressedSize is updated with setString.
  * 
  * @author Stefan Wertich
- * @version 1.1.0, 26.02.2009
+ * @version 1.5.0, 24.08.2010
  * 
  */
-public class DBPFRUL implements DBPFType {
+public class DBPFRUL extends AbstractDBPFType {
 
-	private long[] tgi;
 	private char[] data;
-	private boolean compressed;
-	private long decompressedSize;
 
 	/**
 	 * Constructor.<br>
 	 */
 	public DBPFRUL() {
-		tgi = new long[0];
 		data = new char[0];
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("TGI: ");
-		sb.append(DBPFUtil.toHex(tgi[0], 8));
-		sb.append(",");
-		sb.append(DBPFUtil.toHex(tgi[1], 8));
-		sb.append(",");
-		sb.append(DBPFUtil.toHex(tgi[2], 8));
-		sb.append(",");
-		sb.append("Compressed: ");
-		sb.append(compressed);
+		sb.append(super.toString());
 		sb.append(", ");
-		sb.append("Data-Size: " + data.length);		
+		sb.append("Data-Size: " + data.length);
 		return sb.toString();
 	}
-	
+
+	@Override
 	public String toDetailString() {
 		StringBuffer sb = new StringBuffer(toString());
 		if (data.length > 0) {
@@ -76,35 +64,5 @@ public class DBPFRUL implements DBPFType {
 	@Override
 	public int getType() {
 		return DBPFTypes.RUL;
-	}
-
-	@Override
-	public long[] getTGI() {
-		return tgi;
-	}
-
-	@Override
-	public void setTGI(long[] tgi) {
-		this.tgi = tgi;
-	}
-	
-	@Override
-	public boolean isCompressed() {
-		return compressed;
-	}
-
-	@Override
-	public void setCompressed(boolean compressed) {
-		this.compressed = compressed;		
-	}
-	
-	@Override
-	public long getDecompressedSize() {
-		return decompressedSize;
-	}
-
-	@Override
-	public void setDecompressedSize(long decompressedSize) {
-		this.decompressedSize = decompressedSize;
 	}
 }

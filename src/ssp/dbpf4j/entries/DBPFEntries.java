@@ -1,6 +1,6 @@
 package ssp.dbpf4j.entries;
 
-import ssp.dbpf4j.util.DBPFUtil;
+import ssp.dbpf4j.util.DBPFUtil2;
 
 /**
  * Stores the definitions of the DBPFEntries.<br>
@@ -22,27 +22,27 @@ public class DBPFEntries {
 	 */
 	public static String getString(long[] tgi) {
 		String type = "UNKNOWN";
-		if (DBPFUtil.isTGI(tgi, DBPFEntries.DIRECTORY)) {
+		if (DBPFUtil2.isTGI(tgi, DBPFEntries.DIRECTORY)) {
 			type = "DIR";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.LD)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.LD)) {
 			type = "LD";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.EXEMPLAR)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.EXEMPLAR)) {
 			type = "EXEMPLAR";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.PNG)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.PNG)) {
 			type = "PNG";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.PNG_ICON)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.PNG_ICON)) {
 			type = "PNG (Icon)";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.LUA)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.LUA)) {
 			type = "LUA";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.WAV)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.WAV)) {
 			type = "WAV";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.LTEXT)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.LTEXT)) {
 			type = "LTEXT";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.RUL)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.RUL)) {
 			type = "RUL";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.FSH)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.FSH)) {
 			type = "FSH";
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.S3D)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.S3D)) {
 			type = "S3D";
 		}
 		return type;

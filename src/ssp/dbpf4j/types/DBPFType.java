@@ -4,7 +4,7 @@ package ssp.dbpf4j.types;
  * Defines an interface for all DBPFTypes.<br>
  * 
  * @author Stefan Wertich
- * @version 0.9.1.21, 21.01.2009
+ * @version 1.5.0, 24.08.2010
  * 
  */
 public interface DBPFType {
@@ -63,5 +63,26 @@ public interface DBPFType {
 	 * @return The TGI
 	 */
 	public long[] getTGI();
+	
+	/**
+	 * Returns the TypeID.<br>
+	 * 
+	 * @return The typeID
+	 */
+	public long getTID();
+
+	/**
+	 * Returns the GroupID.<br>
+	 * 
+	 * @return The groupID
+	 */
+	public long getGID();
+
+	/**
+	 * Returns the InstanceID.<br>
+	 * 
+	 * @return The instanceID
+	 */
+	public long getIID();
 
 }

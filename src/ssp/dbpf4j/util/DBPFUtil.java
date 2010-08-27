@@ -1,18 +1,28 @@
 package ssp.dbpf4j.util;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Formatter;
+import java.util.Locale;
 import java.util.Vector;
+
+import ssp.dbpf4j.properties.PropertyType;
 
 /**
  * Various tools for DBPF.<br>
  * 
  * @author Stefan Wertich
- * @version 1.3.0, 04.11.2009
+ * @version 1.5.0, 25.08.2010
  * 
  */
 public class DBPFUtil {
+
+	/**
+	 * The logger name for logging events
+	 */
+	public static final String LOGGER_NAME = "DBPF4J";
 
 	/**
 	 * Magic number for DBPF
@@ -40,11 +50,24 @@ public class DBPFUtil {
 	 * 
 	 */
 	public static final short FORMAT_TEXT = 0x54;
-	
+
+	/**
+	 * The format for FLOAT values, used for Text-Format
+	 */
+	public static final DecimalFormat FLOAT_FORMAT;
+
+	// Creates the FLOAT_FORMAT
+	static {
+		DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.US);
+		FLOAT_FORMAT = new DecimalFormat("#0.#");
+		FLOAT_FORMAT.setMaximumFractionDigits(6);
+		FLOAT_FORMAT.setDecimalFormatSymbols(dfs);
+	}
+
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// EXEMPLAR
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	
+
 	/**
 	 * Returns a string for the given exemplar format.<br>
 	 * 
@@ -66,7 +89,7 @@ public class DBPFUtil {
 	}
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	// HEX, DATE
+	// CONVERT, FORMAT, DATE
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	/**
@@ -101,30 +124,73 @@ public class DBPFUtil {
 	}
 
 	/**
-	 * Converts an UINT32 value to an HEX string.<br>
-	 * Cause of unsigned it is given as long but will be cast to int.
+	 * Converts a long value to an HEX string.<br>
 	 * 
-	 * @param l
-	 *            The uint32 value
+	 * @param value
+	 *            The long value
 	 * @param length
 	 *            The length of the string
 	 * @return The hex string
 	 */
-	public static String toHex(long l, int length) {
-		return new Formatter().format("%0" + length + "x", l).toString();
+	public static String toHex(long value, int length) {
+		return new Formatter().format("%0" + length + "x", value).toString();
 	}
 
 	/**
-	 * Converts an FLOAT32 value to an HEX string.<br>
+	 * Converts an float value to an HEX string.<br>
 	 * 
-	 * @param f
-	 *            The float32 value
+	 * @param value
+	 *            The float value
 	 * @param length
 	 *            The length of the string
 	 * @return The hex string
 	 */
-	public static String toHex(float f, int length) {
-		return toHex(convertFloatToHex(f), length);
+	public static String toHex(float value, int length) {
+		return toHex(convertFloatToHex(value), length);
+	}
+
+	/**
+	 * Returns the boolean string for the value.<br>
+	 * 
+	 * @param value
+	 *            The value: 0x00=False, 0x01=True
+	 * @return True or False as string
+	 */
+	public static String toBooleanString(long value) {
+		if (value == 0x01) {
+			return "True";
+		}
+		return "False";
+	}
+
+	/**
+	 * Return the long value of the boolean.<br>
+	 * If boolean is TRUE this will return 1L, else 0L.
+	 * 
+	 * @param b
+	 *            The boolean
+	 * @return 1L, if boolean is TRUE; 0L, otherwise
+	 */
+	public static long toLong(boolean b) {
+		if (b) {
+			return 1L;
+		}
+		return 0L;
+	}
+
+	/**
+	 * Returns the boolean for the given long.<br>
+	 * If long is 1L this will return TRUE, else FALSE.
+	 * 
+	 * @param l
+	 *            The long value
+	 * @return TRUE, if value = 1L; FALSE, otherwise
+	 */
+	public static boolean toBool(long l) {
+		if (l == 1L) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -158,27 +224,22 @@ public class DBPFUtil {
 	 * @param tgiCheck
 	 *            The TGI to check with
 	 * @return TRUE, if the both are same; FALSE, otherwise
+	 * 
+	 * @deprecated Replaced by DBPFUtil2.isTGI()
 	 */
 	public static boolean isTGI(long[] tgiEntry, long[] tgiCheck) {
-		if (tgiEntry.length == 3 && tgiCheck.length == 3) {
-			boolean tidOK = (tgiCheck[0] == -1) || (tgiEntry[0] == tgiCheck[0]);
-			boolean gidOK = (tgiCheck[1] == -1) || (tgiEntry[1] == tgiCheck[1]);
-			boolean iidOK = (tgiCheck[2] == -1) || (tgiEntry[2] == tgiCheck[2]);
-			if (tidOK && gidOK && iidOK) {
-				return true;
-			}
-		}
-		return false;
+		return DBPFUtil2.isTGI(tgiEntry, tgiCheck);
 	}
-	
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// ARRAY: convert, read, write
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	/**
-	 * Converts a UINT32 to short array.<br>
-	 * The array will be sorted in Low-To-High-Order!
+	 * Converts a long value to a short array.<br>
+	 * The long value could be positive or negative. The result will be set into
+	 * the array from lowest to highest truncing bytes, if the length of the
+	 * array is too small. The array will be sorted in Low-To-High-Order!
 	 * 
 	 * e.g.:<br>
 	 * 530 dec is 0212 hex, so with length 2 it will be [0]=0x12,[1]=0x02<br>
@@ -186,24 +247,22 @@ public class DBPFUtil {
 	 * [0]=0x12,[1]=0x02,[2]=0x00<br>
 	 * 
 	 * @param value
-	 *            The uint32 value
+	 *            The long value
 	 * @param length
-	 *            The length of the array, normally 4
-	 * @return An array with length strings in Low-To-High-order
+	 *            The length of the array
+	 * @return An array in Low-To-High-Order
 	 */
 	public static short[] toShortArray(long value, int length) {
 		short[] ret = new short[length];
-		for (int i = 0; i < length; i++) {
-			long rest = value % 256;
-			ret[i] = (short) rest;
-			value = value / 256;
-		}
+		toArray(value, ret, 0, length);
 		return ret;
 	}
 
 	/**
-	 * Converts a FLOAT32 to short array.<br>
-	 * The array will be sorted in Low-To-High-Order!
+	 * Converts a float value to a short array.<br>
+	 * The float value could be positive or negative. The result will be set
+	 * into the array from lowest to highest truncing bytes, if the length of
+	 * the array is too small. The array will be sorted in Low-To-High-Order!
 	 * 
 	 * e.g.:<br>
 	 * 530 dec is 0212 hex, so with length 2 it will be [0]=0x12,[1]=0x02<br>
@@ -213,15 +272,235 @@ public class DBPFUtil {
 	 * @param value
 	 *            The float value
 	 * @param length
-	 *            The length of the array, normally 4
-	 * @return An array with length strings in Low-To-High-order
+	 *            The length of the array
+	 * @return An array in Low-To-High-Order
 	 */
 	public static short[] toShortArray(float value, int length) {
 		return toShortArray(convertFloatToHex(value), length);
 	}
 
 	/**
+	 * Converts a long value to a short array.<br>
+	 * The long value could be positive or negative. The result will be set into
+	 * the array from lowest to highest truncing bytes, if the length of the
+	 * array is too small. The array will be sorted in Low-To-High-Order!
+	 * 
+	 * e.g.:<br>
+	 * 530 dec is 0212 hex, so with length 2 it will be [0]=0x12,[1]=0x02<br>
+	 * 530 dec is 0212 hex, so with length 3 it will be
+	 * [0]=0x12,[1]=0x02,[2]=0x00<br>
+	 * 
+	 * @param value
+	 *            The long value
+	 * @param dest
+	 *            The destination array
+	 * @param offset
+	 *            The offset inside the array
+	 * @param length
+	 *            The length of the array
+	 */
+	public static void toArray(long value, short[] dest, int offset, int length) {
+		// create the hex string from the value
+		String s = Long.toHexString(value);
+		// fill with necessary zeros to fit into array
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < 2 * length - s.length(); i++) {
+			sb.append('0');
+		}
+		s = sb.toString() + s;
+		// fill the array from lowest to highest
+		int idx;
+		for (int i = 0; i < length; i++) {
+			idx = s.length() - 2 * i;
+			dest[offset + i] = Short.parseShort(s.substring(idx - 2, idx), 16);
+		}
+	}
+
+	/**
+	 * Converts a float value to a short array.<br>
+	 * The float value could be positive or negative. The result will be set
+	 * into the array from lowest to highest truncing bytes, if the length of
+	 * the array is too small. The array will be sorted in Low-To-High-Order!
+	 * 
+	 * e.g.:<br>
+	 * 530 dec is 0212 hex, so with length 2 it will be [0]=0x12,[1]=0x02<br>
+	 * 530 dec is 0212 hex, so with length 3 it will be
+	 * [0]=0x12,[1]=0x02,[2]=0x00<br>
+	 * 
+	 * @param value
+	 *            The float value
+	 * @param dest
+	 *            The destination array
+	 * @param offset
+	 *            The offset inside the array
+	 * @param length
+	 *            The length of the array
+	 */
+	public static void toArray(float value, short[] dest, int offset, int length) {
+		toArray(convertFloatToHex(value), dest, offset, length);
+	}
+
+	/**
+	 * Converts an short array to a long value.<br>
+	 * 
+	 * This method is normally used for Binary format of an exemplar.
+	 * 
+	 * The array is sorted Low-To-High-Order. The value could be signed
+	 * interpreted or not.
+	 * 
+	 * 
+	 * @param data
+	 *            The array
+	 * @param start
+	 *            The start in the array
+	 * @param length
+	 *            The length
+	 * @param signed
+	 *            TRUE, if value is signed; FALSE, otherwise
+	 * @return The long value
+	 */
+	public static long toValue(short[] data, int start, int length,
+			boolean signed) {
+		long result = 0L;
+
+		// value is negative, if last short is 0xF
+		if (signed && (data[start + length - 1] & 0xF0) == 0xF0) {
+
+			// create an hex string from the shorts
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < length; i++) {
+				sb.append(toHex(data[start + length - 1 - i], 2));
+			}
+			String hexString = sb.toString();
+
+			// get signifikant index
+			int slength = hexString.length();
+			int i = 0;
+			while (i < slength) {
+				if (hexString.charAt(i) == 'f') {
+					i++;
+				} else {
+					break;
+				}
+			}
+
+			// get signifikant bits
+			String value = hexString.substring(i);
+			long val = Long.parseLong(value, 16);
+
+			// create specific maximum from length and signifikant bits length
+			final long MAX = (long) Math.pow(16, (slength - i));
+
+			// get final result
+			result = -(MAX - val);
+		} else {
+			for (int i = 0; i < length; i++) {
+				short readed = data[start + i];
+				result += (readed * Math.pow(256, i));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Converts a hexString to a long value.<br>
+	 * 
+	 * The method is normally used for Text format of an exemplar.
+	 * 
+	 * The value could be signed interpreted or not. The string could start with
+	 * 0x or without.
+	 * 
+	 * @param hexString
+	 *            The hexString
+	 * @param signed
+	 *            TRUE, if value is signed; FALSE, otherwise
+	 * @return The long value
+	 */
+	public static long toValue(String hexString, boolean signed) {
+		long result = 0L;
+		hexString = hexString.toLowerCase();
+		if (hexString.startsWith("0x")) {
+			hexString = hexString.substring(2);
+		}
+		// value is negative, if last short is 0xF
+		if (signed && hexString.startsWith("f")) {
+
+			// get signifikant index
+			int slength = hexString.length();
+			int i = 0;
+			while (i < slength) {
+				if (hexString.charAt(i) == 'f') {
+					i++;
+				} else {
+					break;
+				}
+			}
+
+			// get signifikant bits
+			String value = hexString.substring(i);
+			long val = Long.parseLong(value, 16);
+
+			// create specific maximum from length and signifikant bits length
+			final long MAX = (long) Math.pow(16, (slength - i));
+
+			// get final result
+			result = -(MAX - val);
+		} else {
+			result = Long.parseLong(hexString, 16);
+		}
+		return result;
+	}
+
+	/**
+	 * Reads a value till length reached.<br>
+	 * 
+	 * @param type
+	 *            PropertyType.SINT32 or PropertyType.SINT64 for signed values;
+	 *            Otherwise for unsigned
+	 * @param data
+	 *            The data
+	 * @param start
+	 *            The start offset
+	 * @param length
+	 *            The length
+	 * 
+	 * @return A long value
+	 */
+	public static long getValue(PropertyType type, short[] data, int start,
+			int length) {
+		if (type == PropertyType.SINT32 || type == PropertyType.SINT64) {
+			return getSint32(data, start, length);
+		}
+		return getUint32(data, start, length);
+	}
+
+	/**
+	 * Writes a value till length reached.<br>
+	 * 
+	 * @param type
+	 *            PropertyType.SINT32 or PropertyType.SINT64 for signed values;
+	 *            Otherwise for unsigned
+	 * @param value
+	 *            The value
+	 * @param data
+	 *            The data
+	 * @param start
+	 *            The start offset
+	 * @param length
+	 *            The length
+	 */
+	public static void setValue(PropertyType type, long value, short[] data,
+			int start, int length) {
+		if (type == PropertyType.SINT32 || type == PropertyType.SINT64) {
+			setSint32(value, data, start, length);
+		}
+		setUint32(value, data, start, length);
+	}
+
+	/**
 	 * Reads an UINT32 till length reached.<br>
+	 * 
+	 * Only for positive values for the result!
 	 * 
 	 * @param data
 	 *            The data
@@ -233,12 +512,7 @@ public class DBPFUtil {
 	 * @return A long value to store UINT32
 	 */
 	public static long getUint32(short[] data, int start, int length) {
-		long sum = 0;
-		for (int i = 0; i < length; i++) {
-			short readed = data[start + i];
-			sum += (readed * Math.pow(16 * 16, i));
-		}
-		return sum;
+		return toValue(data, start, length, false);
 	}
 
 	/**
@@ -255,10 +529,42 @@ public class DBPFUtil {
 	 * 
 	 */
 	public static void setUint32(long value, short[] data, int start, int length) {
-		short[] array = toShortArray(value, length);
-		for (int i = 0; i < array.length; i++) {
-			data[start + i] = array[i];
-		}
+		toArray(value, data, start, length);
+	}
+
+	/**
+	 * Reads an SINT32 till length reached.<br>
+	 * 
+	 * For positive and negative values for the result.
+	 * 
+	 * @param data
+	 *            The data
+	 * @param start
+	 *            The start offset
+	 * @param length
+	 *            The length
+	 * 
+	 * @return A long value to store SINT32
+	 */
+	public static long getSint32(short[] data, int start, int length) {
+		return toValue(data, start, length, true);
+	}
+
+	/**
+	 * Writes an SINT32 till length reached.<br>
+	 * 
+	 * @param value
+	 *            The value
+	 * @param data
+	 *            The data
+	 * @param start
+	 *            The start offset
+	 * @param length
+	 *            The length
+	 * 
+	 */
+	public static void setSint32(long value, short[] data, int start, int length) {
+		toArray(value, data, start, length);
 	}
 
 	/**
@@ -311,7 +617,6 @@ public class DBPFUtil {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < length; i++) {
 			sb.append((char) data[start + i]);
-
 		}
 		return sb.toString();
 	}

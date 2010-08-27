@@ -1,14 +1,27 @@
 package ssp.dbpf4j.properties;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import ssp.dbpf4j.util.DBPFUtil;
 
 /**
  * Defines some constants for DBPFProperty.<br>
  * 
+ * Tries to load the Properties from the file
+ * resources/properties/properties.xml, if not found tries to load from inside
+ * this JAR-File.
+ * 
+ * This has been supersede by {@link ssp.dbpf4j.properties.ExemplarProperties}.
+ * New implementations should consider using {@code ExemplarProperties} instead,
+ * as it provides a type-safe alternative to this class, as well as adds new
+ * features not available in this class.
+ * 
  * @author Stefan Wertich
  * @version 1.3.0, 22.11.2009
- * 
  */
 public class DBPFProperties {
 
@@ -48,10 +61,41 @@ public class DBPFProperties {
 	public static final long MONTHLY_COST = 0xea54d286L;
 	public static final long ITEM_BUTTON_ID = 0x8a2602bbL;
 
+	/**
+	 * Initialize the properties for first use.
+	 */
+	static {
+		String propertiesFile = "resources/properties/properties.xml";
+		InputStream is;
+		// Try external property file
+		try {
+			is = new FileInputStream(propertiesFile);
+		} catch (FileNotFoundException e) {
+			is = null;
+			// ignore this
+		}
+
+		// Try internal property file
+		if (is == null) {
+			is = DBPFProperties.class.getResourceAsStream("/" + propertiesFile);
+		}
+
+		if (is != null) {
+			ExemplarProperties.loadProperties(is,
+					ExemplarProperties.XML_FORMAT_READER);
+		} else {
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(
+					Level.SEVERE,
+					"Can not load Exemplar Properties from file: "
+							+ propertiesFile);
+		}
+	}
+
 	/*
 	 * All property values and names in this list
 	 */
-	public static LinkedHashMap<Long, String> propertyList = new LinkedHashMap<Long, String>();
+	// public static LinkedHashMap<Long, String> propertyList = new
+	// LinkedHashMap<Long, String>();
 
 	/**
 	 * Returns the first value for the given key.<br>
@@ -61,7 +105,8 @@ public class DBPFProperties {
 	 * @return The value or NULL, if not found
 	 */
 	public static String getString(long key) {
-		return propertyList.get(key);
+		return ExemplarProperties.getProperties().forID.get(key).getName();
+		// return propertyList.get(key);
 	}
 
 	/**
@@ -72,17 +117,18 @@ public class DBPFProperties {
 	 * @return The key or -1, if not found
 	 */
 	public static long getKey(String value) {
-		long key = -1;
-		if (propertyList.containsValue(value)) {
-			Iterator<Long> itera = propertyList.keySet().iterator();
-			while (key == -1 && itera.hasNext()) {
-				long keyTemp = itera.next();
-				String elem = propertyList.get(keyTemp);
-				if (elem.equals(value)) {
-					key = keyTemp;
-				}
-			}
-		}
-		return key;
+		return ExemplarProperties.getProperties().forName.get(value).getId();
+		// long key = -1;
+		// if (propertyList.containsValue(value)) {
+		// Iterator<Long> itera = propertyList.keySet().iterator();
+		// while (key == -1 && itera.hasNext()) {
+		// long keyTemp = itera.next();
+		// String elem = propertyList.get(keyTemp);
+		// if (elem.equals(value)) {
+		// key = keyTemp;
+		// }
+		// }
+		// }
+		// return key;
 	}
 }

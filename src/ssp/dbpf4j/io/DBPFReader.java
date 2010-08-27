@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import ssp.dbpf4j.DBPFFile;
 import ssp.dbpf4j.entries.DBPFEntry;
@@ -15,7 +17,7 @@ import ssp.dbpf4j.util.DBPFUtil;
  * Reads the DBPF format.<br>
  * 
  * @author Stefan Wertich
- * @version 1.0.2, 05.02.2009
+ * @version 1.5.0, 26.08.2010
  * 
  */
 public class DBPFReader {
@@ -41,9 +43,11 @@ public class DBPFReader {
 				return true;
 			}
 		} catch (FileNotFoundException e) {
-			System.err.println("[DBPFReader] checkFileType: " + e.getMessage());
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFReader] File not found: " + filename, e);
 		} catch (IOException e) {
-			System.err.println("[DBPFReader] checkFileType: " + e.getMessage());
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFReader] IOException for file: " + filename, e);
 		}
 		return false;
 	}
@@ -53,7 +57,7 @@ public class DBPFReader {
 	 * 
 	 * @param filename
 	 *            The filename of the DBPF file
-	 * @return The file object or NULL, if file not found
+	 * @return The file object or NULL, if file not found or error
 	 */
 	public DBPFFile read(File filename) {
 		// to store the entries of the file
@@ -106,14 +110,23 @@ public class DBPFReader {
 					// System.out.println(entry.toString());
 				}
 			} else {
-				raf.close();
-				return null;
+				dbpfFile = null;
 			}
-			raf.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFReader] File not found: " + filename, e);
+			dbpfFile = null;
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFReader] IOException for file: " + filename, e);
+			dbpfFile = null;
+		} finally {
+			try {
+				raf.close();
+			} catch (IOException e) {
+				Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+						"[DBPFReader] IOException for file: " + filename, e);
+			}
 		}
 		return dbpfFile;
 	}
@@ -182,9 +195,11 @@ public class DBPFReader {
 			}
 			raf.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFReader] File not found: " + filename, e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFReader] IOException for file: " + filename, e);
 		}
 		return data;
 	}
@@ -209,9 +224,11 @@ public class DBPFReader {
 			}
 			bis.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFReader] File not found: " + filename, e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFReader] IOException for file: " + filename, e);
 		}
 		return rawData;
 	}

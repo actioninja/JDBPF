@@ -19,10 +19,6 @@ The changelog.html shows the last changelogs.
 
 This package support the binary (EQZB1) and text (EQZT1) format in 
 version 1.
-For correct T-Format a property file has to loaded and set with: 
-DBPFProperties.propertyList=...(LinkedHashMap<Long, String>).
-The long is the property id and the string is the property string.
-Otherwise only the binary format will be handled correctly!
 
 
 BUGS & IDEAS
@@ -55,4 +51,4 @@ CONTACT
 You can reach the author at: mapsonswen@web.de
 
 
-Document version: 5, 2010-04-02  
+Document version: 6, 2010-08-27  

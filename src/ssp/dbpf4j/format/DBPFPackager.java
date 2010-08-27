@@ -1,7 +1,9 @@
-package ssp.dbpf4j.util;
+package ssp.dbpf4j.format;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import ssp.dbpf4j.util.DBPFUtil;
 
 /**
  * Handle compressed data in DBPF format.<br>

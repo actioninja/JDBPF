@@ -1,4 +1,4 @@
-package ssp.dbpf4j.util;
+package ssp.dbpf4j.format;
 
 import java.util.Vector;
 
@@ -14,6 +14,8 @@ import ssp.dbpf4j.types.DBPFRUL;
 import ssp.dbpf4j.types.DBPFRaw;
 import ssp.dbpf4j.types.DBPFType;
 import ssp.dbpf4j.types.DBPFTypes;
+import ssp.dbpf4j.util.DBPFUtil;
+import ssp.dbpf4j.util.DBPFUtil2;
 
 /**
  * This class provide functions to convert between DBPFEntry, DBPFType and
@@ -63,12 +65,12 @@ public class DBPFConverter {
 	 */
 	public static DBPFType createType(DBPFEntry entry, boolean onlyRawType) {
 		long[] tgi = entry.getTGI();
-//		System.out.println("Entry: "+entry.toString()+","+entry.getFilename());
+		// System.out.println("Entry: "+entry.toString()+","+entry.getFilename());
 		// read rawdata from entry
 		short[] data = DBPFReader.readData(entry);
 		DBPFPackager packager = new DBPFPackager();
 		short[] dData = packager.decompress(data);
-		
+
 		if (onlyRawType) {
 			DBPFRaw type = new DBPFRaw();
 			type.setTGI(tgi);
@@ -79,27 +81,27 @@ public class DBPFConverter {
 		}
 
 		DBPFType type = null;
-		if (DBPFUtil.isTGI(tgi, DBPFEntries.EXEMPLAR)) {
+		if (DBPFUtil2.isTGI(tgi, DBPFEntries.EXEMPLAR)) {
 			type = DBPFCoder.createExemplar(dData);
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.PNG)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.PNG)) {
 			type = new DBPFPNG();
 			((DBPFPNG) type).setImageData(dData);
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.WAV)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.WAV)) {
 			// FIXME not implemented yet, so use DBPFRaw
 			type = null;
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.LTEXT)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.LTEXT)) {
 			type = DBPFCoder.createLText(dData);
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.DIRECTORY)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.DIRECTORY)) {
 			type = new DBPFDirectory();
 			((DBPFDirectory) type).setData(data);
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.LUA)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.LUA)) {
 			type = DBPFCoder.createLUA(dData);
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.RUL)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.RUL)) {
 			type = DBPFCoder.createRUL(dData);
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.FSH)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.FSH)) {
 			// FIXME not implemented yet, so use DBPFRaw
 			type = null;
-		} else if (DBPFUtil.isTGI(tgi, DBPFEntries.S3D)) {
+		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.S3D)) {
 			// FIXME not implemented yet, so use DBPFRaw
 			type = null;
 		}
@@ -123,7 +125,7 @@ public class DBPFConverter {
 	 * @return The exemplar or NULL
 	 */
 	public static DBPFExemplar createExemplar(DBPFEntry entry) {
-		if (DBPFUtil.isTGI(entry.getTGI(), DBPFEntries.EXEMPLAR)) {
+		if (DBPFUtil2.isTGI(entry.getTGI(), DBPFEntries.EXEMPLAR)) {
 			DBPFType type = DBPFConverter.createType(entry);
 			if (type instanceof DBPFExemplar) {
 				return (DBPFExemplar) type;
@@ -141,7 +143,7 @@ public class DBPFConverter {
 	 * @return The PNG or NULL
 	 */
 	public static DBPFPNG createPNG(DBPFEntry entry) {
-		if (DBPFUtil.isTGI(entry.getTGI(), DBPFEntries.PNG)) {
+		if (DBPFUtil2.isTGI(entry.getTGI(), DBPFEntries.PNG)) {
 			DBPFType type = DBPFConverter.createType(entry);
 			if (type instanceof DBPFPNG) {
 				return (DBPFPNG) type;
@@ -159,7 +161,7 @@ public class DBPFConverter {
 	 * @return The LText or NULL
 	 */
 	public static DBPFLText createLTEXT(DBPFEntry entry) {
-		if (DBPFUtil.isTGI(entry.getTGI(), DBPFEntries.LTEXT)) {
+		if (DBPFUtil2.isTGI(entry.getTGI(), DBPFEntries.LTEXT)) {
 			DBPFType type = DBPFConverter.createType(entry);
 			if (type instanceof DBPFLText) {
 				return (DBPFLText) type;
@@ -239,7 +241,7 @@ public class DBPFConverter {
 		DBPFType dir = null;
 		Vector<DBPFType> v = new Vector<DBPFType>();
 		for (DBPFType type : writeList) {
-			if (DBPFUtil.isTGI(type.getTGI(), DBPFEntries.DIRECTORY)) {
+			if (DBPFUtil2.isTGI(type.getTGI(), DBPFEntries.DIRECTORY)) {
 				dir = type;
 			} else if (type.isCompressed()) {
 				v.addElement(type);

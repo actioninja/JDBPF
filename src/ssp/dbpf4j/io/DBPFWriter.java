@@ -7,18 +7,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import ssp.dbpf4j.DBPFFile;
 import ssp.dbpf4j.entries.DBPFEntry;
+import ssp.dbpf4j.format.DBPFConverter;
 import ssp.dbpf4j.types.DBPFType;
-import ssp.dbpf4j.util.DBPFConverter;
 import ssp.dbpf4j.util.DBPFUtil;
 
 /**
  * Writes the DBPF format.<br>
  * 
  * @author Stefan Wertich
- * @version 1.3.1, 20.01.2010
+ * @version 1.5.0, 24.08.2010
  * 
  */
 public class DBPFWriter {
@@ -107,11 +109,20 @@ public class DBPFWriter {
 
 			raf.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFWriter] File not found: " + filename, e);
 			return false;
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFWriter] IOException for file: " + filename, e);
 			return false;
+		} finally {
+			try {
+				raf.close();
+			} catch (IOException e) {
+				Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+						"[DBPFWriter] IOException for file: " + filename, e);
+			}
 		}
 		return true;
 	}
@@ -171,8 +182,8 @@ public class DBPFWriter {
 	 */
 	public static boolean writeData(DBPFEntry entry, short[] data) {
 		RandomAccessFile raf = null;
+		File filename = entry.getFilename();
 		try {
-			File filename = entry.getFilename();
 			if (!filename.exists()) {
 				filename.createNewFile();
 			}
@@ -184,9 +195,11 @@ public class DBPFWriter {
 			raf.close();
 			return true;
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFWriter] File not found: " + filename, e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFWriter] IOException for file: " + filename, e);
 		}
 		return false;
 	}
@@ -215,9 +228,11 @@ public class DBPFWriter {
 			bos.close();
 			return true;
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFWriter] File not found: " + filename, e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
+					"[DBPFWriter] IOException for file: " + filename, e);
 		}
 		return false;
 	}

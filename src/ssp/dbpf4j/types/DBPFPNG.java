@@ -1,7 +1,5 @@
 package ssp.dbpf4j.types;
 
-import ssp.dbpf4j.util.DBPFUtil;
-
 /**
  * Defines a PNG of DBPF.<br>
  * 
@@ -10,42 +8,26 @@ import ssp.dbpf4j.util.DBPFUtil;
  * might be compressed, it could be compressed with QFS.
  * 
  * @author Stefan Wertich
- * @version 0.9.1.23, 23.01.2009
+ * @version 1.5.0, 24.08.2010
  * 
  */
-public class DBPFPNG implements DBPFType {
+public class DBPFPNG extends AbstractDBPFType {
 
-	private long[] tgi;
 	private short[] imageData;
-	private boolean compressed;
-	private long decompressedSize;
 
 	/**
 	 * Constructor.<br>
 	 */
 	public DBPFPNG() {
-		tgi = new long[0];
 		imageData = new short[0];
 	}
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("TGI: ");
-		sb.append(DBPFUtil.toHex(tgi[0], 8));
-		sb.append(",");
-		sb.append(DBPFUtil.toHex(tgi[1], 8));
-		sb.append(",");
-		sb.append(DBPFUtil.toHex(tgi[2], 8));
-		sb.append(",");
-		sb.append("Compressed: ");
-		sb.append(compressed);
+		sb.append(super.toString());
 		sb.append(", ");
 		sb.append("ImageData-Size: " + imageData.length);
 		return sb.toString();
-	}
-
-	public String toDetailString() {
-		return toString();
 	}
 
 	/**
@@ -71,35 +53,5 @@ public class DBPFPNG implements DBPFType {
 	@Override
 	public int getType() {
 		return DBPFTypes.PNG;
-	}
-
-	@Override
-	public long[] getTGI() {
-		return tgi;
-	}
-
-	@Override
-	public void setTGI(long[] tgi) {
-		this.tgi = tgi;
-	}
-
-	@Override
-	public boolean isCompressed() {
-		return compressed;
-	}
-
-	@Override
-	public void setCompressed(boolean compressed) {
-		this.compressed = compressed;
-	}
-
-	@Override
-	public long getDecompressedSize() {
-		return decompressedSize;
-	}
-
-	@Override
-	public void setDecompressedSize(long decompressedSize) {
-		this.decompressedSize = decompressedSize;
 	}
 }
