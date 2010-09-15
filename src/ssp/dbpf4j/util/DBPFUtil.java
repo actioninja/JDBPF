@@ -14,7 +14,7 @@ import ssp.dbpf4j.properties.PropertyType;
  * Various tools for DBPF.<br>
  * 
  * @author Stefan Wertich
- * @version 1.5.0, 25.08.2010
+ * @version 1.5.1, 15.09.2010
  * 
  */
 public class DBPFUtil {
@@ -384,15 +384,21 @@ public class DBPFUtil {
 				}
 			}
 
-			// get signifikant bits
-			String value = hexString.substring(i);
-			long val = Long.parseLong(value, 16);
+			if (i == slength) {
+				// only FF for value
+				result = -1;
+			} else {
+				// get signifikant bits
+				String value = hexString.substring(i);
+				long val = Long.parseLong(value, 16);
 
-			// create specific maximum from length and signifikant bits length
-			final long MAX = (long) Math.pow(16, (slength - i));
+				// create specific maximum from length and signifikant bits
+				// length
+				final long MAX = (long) Math.pow(16, (slength - i));
 
-			// get final result
-			result = -(MAX - val);
+				// get final result
+				result = -(MAX - val);
+			}
 		} else {
 			for (int i = 0; i < length; i++) {
 				short readed = data[start + i];

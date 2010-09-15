@@ -201,9 +201,10 @@ public class DBPFCoder {
 					ite.getMessage(), ite);
 		}
 		if (prop == null) {
-			System.err.println("Property can not be decoded! "
-					+ DBPFUtil.toHex(id, 8) + "," + DBPFUtil.toHex(typeID, 4)
-					+ "," + hasCount + "," + count);
+			System.err.println("Property can not be decoded! ID=0x"
+					+ DBPFUtil.toHex(id, 8) + ", TypeID="
+					+ DBPFUtil.toHex(typeID, 4) + ", HasCount=" + hasCount
+					+ ", Count=" + count);
 		}
 		return prop;
 	}
