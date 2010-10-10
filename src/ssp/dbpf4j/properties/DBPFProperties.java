@@ -105,7 +105,14 @@ public class DBPFProperties {
 	 * @return The value or NULL, if not found
 	 */
 	public static String getString(long key) {
-		return ExemplarProperties.getProperties().forID.get(key).getName();
+		ExemplarProperty prop = ExemplarProperties.getProperties().forID.get(key);
+		if (prop != null) {
+			return prop.getName();
+		}
+		
+		// Can not find the prop and prop name for T format
+//		System.out.println("No Prop found for: "+DBPFUtil.toHex(key, 8));
+		return null;
 		// return propertyList.get(key);
 	}
 
