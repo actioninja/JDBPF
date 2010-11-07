@@ -19,7 +19,7 @@ import ssp.dbpf4j.util.DBPFUtil;
  * These data are normally in exemplar files with their properties.
  * 
  * @author Stefan
- * @version 1.5.0, 27.08.2010
+ * @version 1.5.4, 13.10.2010
  * 
  */
 public class DBPFCoder {
@@ -201,10 +201,12 @@ public class DBPFCoder {
 					ite.getMessage(), ite);
 		}
 		if (prop == null) {
-			System.err.println("Property can not be decoded! ID=0x"
+			String message = "Property can not be decoded! ID=0x"
 					+ DBPFUtil.toHex(id, 8) + ", TypeID="
 					+ DBPFUtil.toHex(typeID, 4) + ", HasCount=" + hasCount
-					+ ", Count=" + count);
+					+ ", Count=" + count;
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE, message);
+			System.err.println(message);
 		}
 		return prop;
 	}
@@ -299,11 +301,14 @@ public class DBPFCoder {
 		} catch (InvocationTargetException ite) {
 			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
 					ite.getMessage(), ite);
-		}
+		}		
 		if (prop == null) {
-			System.err.println("Property can not be decoded! "
-					+ DBPFUtil.toHex(id, 8) + "," + DBPFUtil.toHex(type.id, 4)
-					+ "," + hasCount + "," + count);
+			String message = "Property can not be decoded! ID=0x"
+					+ DBPFUtil.toHex(id, 8) + ", TypeID="
+					+ DBPFUtil.toHex(type.id, 4) + ", HasCount=" + hasCount
+					+ ", Count=" + count;
+			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE, message);
+			System.err.println(message);
 		}
 		return prop;
 	}

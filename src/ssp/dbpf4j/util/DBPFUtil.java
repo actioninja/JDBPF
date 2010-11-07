@@ -14,7 +14,7 @@ import ssp.dbpf4j.properties.PropertyType;
  * Various tools for DBPF.<br>
  * 
  * @author Stefan Wertich
- * @version 1.5.1, 15.09.2010
+ * @version 1.5.3, 13.10.2010
  * 
  */
 public class DBPFUtil {
@@ -373,32 +373,7 @@ public class DBPFUtil {
 			}
 			String hexString = sb.toString();
 
-			// get signifikant index
-			int slength = hexString.length();
-			int i = 0;
-			while (i < slength) {
-				if (hexString.charAt(i) == 'f') {
-					i++;
-				} else {
-					break;
-				}
-			}
-
-			if (i == slength) {
-				// only FF for value
-				result = -1;
-			} else {
-				// get signifikant bits
-				String value = hexString.substring(i);
-				long val = Long.parseLong(value, 16);
-
-				// create specific maximum from length and signifikant bits
-				// length
-				final long MAX = (long) Math.pow(16, (slength - i));
-
-				// get final result
-				result = -(MAX - val);
-			}
+			result = getResult(hexString);
 		} else {
 			for (int i = 0; i < length; i++) {
 				short readed = data[start + i];
@@ -430,29 +405,49 @@ public class DBPFUtil {
 		}
 		// value is negative, if last short is 0xF
 		if (signed && hexString.startsWith("f")) {
+			result = getResult(hexString);
+		} else {
+			result = Long.parseLong(hexString, 16);
+		}
+		return result;
+	}
 
-			// get signifikant index
-			int slength = hexString.length();
-			int i = 0;
-			while (i < slength) {
-				if (hexString.charAt(i) == 'f') {
-					i++;
-				} else {
-					break;
-				}
+	/**
+	 * Get the result from the given HexString.<br>
+	 * This method is used by {@link #toValue(String, boolean)} and
+	 * {@link #toValue(short[], int, int, boolean)}.
+	 * 
+	 * @param hexString
+	 *            The hexString
+	 * @return The result
+	 */
+	private static long getResult(String hexString) {
+		long result = 0L;
+		// get signifikant index
+		int slength = hexString.length();
+		int i = 0;
+		while (i < slength) {
+			if (hexString.charAt(i) == 'f') {
+				i++;
+			} else {
+				break;
 			}
+		}
 
+		if (i == slength) {
+			// string consists of 0xFFFFFFFF
+			result = -1;
+		} else {
 			// get signifikant bits
 			String value = hexString.substring(i);
 			long val = Long.parseLong(value, 16);
 
-			// create specific maximum from length and signifikant bits length
+			// create specific maximum from length and signifikant bits
+			// length
 			final long MAX = (long) Math.pow(16, (slength - i));
 
 			// get final result
 			result = -(MAX - val);
-		} else {
-			result = Long.parseLong(hexString, 16);
 		}
 		return result;
 	}

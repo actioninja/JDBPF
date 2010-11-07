@@ -14,7 +14,7 @@ import ssp.dbpf4j.types.DBPFType;
  * Various tools for DBPF.<br>
  * 
  * @author Stefan Stefan
- * @version 1.5.0, 27.08.2010
+ * @version 1.5.3, 13.10.2010
  * 
  */
 public class DBPFUtil2 {
@@ -270,7 +270,9 @@ public class DBPFUtil2 {
 		long[] ret = new long[0];
 		if (property != null && property instanceof DBPFLongProperty) {
 			DBPFLongProperty prop = (DBPFLongProperty) property;
-			if (prop.getCount() == 3) {
+			// Workaround for: BSC Mattb325b Bourke Street School
+			// Accept more than three values but only takes the first three
+			if (prop.getCount() >= 3) {
 				ret = new long[3];
 				for (int i = 0; i < ret.length; i++) {
 					ret[i] = prop.getLong(i);
