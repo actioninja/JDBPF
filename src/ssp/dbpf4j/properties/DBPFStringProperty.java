@@ -21,7 +21,8 @@ public class DBPFStringProperty extends AbstractDBPFProperty {
 	 * Constructor.<br>
 	 */
 	public DBPFStringProperty() {
-		this(DBPFProperties.UNKNOWN, PropertyType.STRING, "");
+		this(DBPFPropertyManager.getProperties().OTHER.getId(),
+				DBPFPropertyTypes.STRING, "");
 	}
 
 	/**
@@ -34,7 +35,7 @@ public class DBPFStringProperty extends AbstractDBPFProperty {
 	 * @param values
 	 *            The values
 	 */
-	public DBPFStringProperty(long id, PropertyType type, String values) {
+	public DBPFStringProperty(long id, DBPFPropertyTypes type, String values) {
 		super(id, 0, type, false, null, 0);
 
 		if (values != null) {
@@ -44,12 +45,12 @@ public class DBPFStringProperty extends AbstractDBPFProperty {
 		}
 	}
 
-	public DBPFStringProperty(long id, int count, PropertyType type,
+	public DBPFStringProperty(long id, int count, DBPFPropertyTypes type,
 			boolean hasCount, short[] rawData, int offset) {
 		super(id, count, type, hasCount, rawData, offset);
 	}
 
-	public DBPFStringProperty(long id, int count, PropertyType type,
+	public DBPFStringProperty(long id, int count, DBPFPropertyTypes type,
 			boolean hasCount, String[] data) {
 		super(id, count, type, hasCount, data);
 	}
@@ -94,7 +95,7 @@ public class DBPFStringProperty extends AbstractDBPFProperty {
 	// public Object getValue(int index) {
 	// if (index != 0)
 	// throw new IndexOutOfBoundsException();
-	//        
+	//
 	// return values;
 	// }
 	//
@@ -131,7 +132,7 @@ public class DBPFStringProperty extends AbstractDBPFProperty {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
 		sb.append(",");
 		sb.append("RepSize: " + values.length);

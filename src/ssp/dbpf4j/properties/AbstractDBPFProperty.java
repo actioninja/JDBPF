@@ -15,7 +15,7 @@ public abstract class AbstractDBPFProperty implements DBPFProperty {
 
 	protected long id;
 	protected int count;
-	protected PropertyType type;
+	protected DBPFPropertyTypes type;
 	protected boolean hasCount;
 
 	// protected Object values;
@@ -57,7 +57,7 @@ public abstract class AbstractDBPFProperty implements DBPFProperty {
 	 * @param offset
 	 *            The offset
 	 */
-	public AbstractDBPFProperty(long id, int count, PropertyType type,
+	public AbstractDBPFProperty(long id, int count, DBPFPropertyTypes type,
 			boolean hasCount, short[] rawData, int offset) {
 		this.id = id;
 		this.count = count;
@@ -81,7 +81,7 @@ public abstract class AbstractDBPFProperty implements DBPFProperty {
 	 * @param data
 	 *            The data
 	 */
-	public AbstractDBPFProperty(long id, int count, PropertyType type,
+	public AbstractDBPFProperty(long id, int count, DBPFPropertyTypes type,
 			boolean hasCount, String[] data) {
 		this.id = id;
 		this.count = count;
@@ -93,7 +93,7 @@ public abstract class AbstractDBPFProperty implements DBPFProperty {
 
 	/**
 	 * Called from the
-	 * {@link #AbstractDBPFProperty(long, int, PropertyType, boolean, short[], int)}
+	 * {@link #AbstractDBPFProperty(long, int, DBPFPropertyTypes, boolean, short[], int)}
 	 * constructor after id, count, type, and hasCount have been initialized.
 	 * 
 	 * @param rawData
@@ -105,7 +105,7 @@ public abstract class AbstractDBPFProperty implements DBPFProperty {
 
 	/**
 	 * Called from the
-	 * {@link #AbstractDBPFProperty(long, int, PropertyType, boolean, String[])}
+	 * {@link #AbstractDBPFProperty(long, int, DBPFPropertyTypes, boolean, String[])}
 	 * constructor after id, count, type, and hasCount have been initialized.
 	 * 
 	 * @param data
@@ -164,18 +164,19 @@ public abstract class AbstractDBPFProperty implements DBPFProperty {
 			count = 0;
 		}
 		// if STRING, use zero for count
-		if (getType() == PropertyType.STRING) {
+		if (getType() == DBPFPropertyTypes.STRING) {
 			count = 0;
 		}
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("0x");
 		sb.append(DBPFUtil.toHex(getID(), 8));
 		sb.append(":{\"");
-		String propName = DBPFProperties.getString(getID());
-		if (propName == null) {
-			propName = "UNKNOWN";
-		}
+		String propName = DBPFPropertyManager.getString(getID());
+		// Catched in getString
+//		if (propName == null) {
+//			propName = "UNKNOWN";
+//		}
 		sb.append(propName);
 		sb.append("\"}=");
 		sb.append(getType().toString());
@@ -239,7 +240,7 @@ public abstract class AbstractDBPFProperty implements DBPFProperty {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("ID: " + DBPFUtil.toHex(id, 8));
 		sb.append(",");
 		sb.append("DataType: " + DBPFUtil.toHex(getType().id, 2));
@@ -269,12 +270,12 @@ public abstract class AbstractDBPFProperty implements DBPFProperty {
 	}
 
 	@Override
-	public PropertyType getType() {
+	public DBPFPropertyTypes getType() {
 		return type;
 	}
 
 	@Override
-	public void setType(PropertyType type) {
+	public void setType(DBPFPropertyTypes type) {
 		this.type = type;
 	}
 

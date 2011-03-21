@@ -2,16 +2,17 @@ package ssp.dbpf4j.format;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Vector;
+import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import ssp.dbpf4j.properties.DBPFProperty;
-import ssp.dbpf4j.properties.PropertyType;
+import ssp.dbpf4j.properties.DBPFPropertyTypes;
+import ssp.dbpf4j.types.DBPFCohort;
 import ssp.dbpf4j.types.DBPFExemplar;
 import ssp.dbpf4j.types.DBPFLText;
 import ssp.dbpf4j.types.DBPFLUA;
 import ssp.dbpf4j.types.DBPFRUL;
+import ssp.dbpf4j.util.DBPFConstant;
 import ssp.dbpf4j.util.DBPFUtil;
 
 /**
@@ -19,10 +20,18 @@ import ssp.dbpf4j.util.DBPFUtil;
  * These data are normally in exemplar files with their properties.
  * 
  * @author Stefan
- * @version 1.5.4, 13.10.2010
+ * @version 1.6.0, 05.01.2011, modified 07.01.2011
  * 
  */
 public class DBPFCoder {
+
+	/**
+	 * Constructor.<br>
+	 * 
+	 * PRIVATE to prevent instance.
+	 */
+	private DBPFCoder() {
+	}
 
 	// ************************************************************************
 	// SPECIFIC DECODING
@@ -82,7 +91,7 @@ public class DBPFCoder {
 	}
 
 	// ************************************************************************
-	// DECODING
+	// DECODING, from short[] to DBPFType
 	// ************************************************************************
 
 	/**
@@ -94,7 +103,7 @@ public class DBPFCoder {
 	 */
 	public static DBPFExemplar createExemplar(short[] dData) {
 		String fileType = DBPFUtil.getChars(dData, 0x00, 3);
-		if (fileType.equals(DBPFUtil.MAGICNUMBER_EQZ)) {
+		if (fileType.equals(DBPFConstant.MAGICNUMBER_EQZ)) {
 			long format = DBPFUtil.getUint32(dData, 0x03, 1);
 			@SuppressWarnings("unused")
 			long unknown1 = DBPFUtil.getUint32(dData, 0x04, 1);
@@ -103,14 +112,44 @@ public class DBPFCoder {
 
 			DBPFExemplar exemplar = null;
 			// B-Format
-			if (format == DBPFUtil.FORMAT_BINARY) {
+			if (format == DBPFConstant.FORMAT_BINARY) {
 				exemplar = createExemplarB(dData);
 			}
 			// T-Format
-			else if (format == DBPFUtil.FORMAT_TEXT) {
+			else if (format == DBPFConstant.FORMAT_TEXT) {
 				exemplar = createExemplarT(dData);
 			}
 			return exemplar;
+		}
+		return null;
+	}
+
+	/**
+	 * Creates an exemplar from the given data.<br>
+	 * 
+	 * @param dData
+	 *            The decompressed data
+	 * @return The exemplar or NULL, if not exemplar
+	 */
+	public static DBPFCohort createCohort(short[] dData) {
+		String fileType = DBPFUtil.getChars(dData, 0x00, 3);
+		if (fileType.equals(DBPFConstant.MAGICNUMBER_CQZ)) {
+			long format = DBPFUtil.getUint32(dData, 0x03, 1);
+			@SuppressWarnings("unused")
+			long unknown1 = DBPFUtil.getUint32(dData, 0x04, 1);
+			@SuppressWarnings("unused")
+			long unknown2 = DBPFUtil.getUint32(dData, 0x05, 3);
+
+			DBPFExemplar exemplar = null;
+			// B-Format
+			if (format == DBPFConstant.FORMAT_BINARY) {
+				exemplar = createExemplarB(dData);
+			}
+			// T-Format
+			else if (format == DBPFConstant.FORMAT_TEXT) {
+				exemplar = createExemplarT(dData);
+			}
+			return new DBPFCohort(exemplar);
 		}
 		return null;
 	}
@@ -143,7 +182,7 @@ public class DBPFCoder {
 			pos += prop.getBinaryLength();
 		}
 		exemplar.setPropertyList(propertyList);
-		exemplar.setFormat(DBPFUtil.FORMAT_BINARY);
+		exemplar.setFormat(DBPFConstant.FORMAT_BINARY);
 		return exemplar;
 	}
 
@@ -160,7 +199,7 @@ public class DBPFCoder {
 		long id = DBPFUtil.getUint32(dData, offset, 4);
 		offset += 4;
 		short typeID = (short) DBPFUtil.getUint32(dData, offset, 2);
-		PropertyType type = PropertyType.forID.get(typeID);
+		DBPFPropertyTypes type = DBPFPropertyTypes.forID.get(typeID);
 
 		offset += 2;
 		long hasCountLong = DBPFUtil.getUint32(dData, offset, 1);
@@ -171,42 +210,36 @@ public class DBPFCoder {
 
 		boolean hasCount = false;
 		int count = 1;
-		if (hasCountLong == 0x80 || type == PropertyType.STRING) {
+		if (hasCountLong == 0x80 || type == DBPFPropertyTypes.STRING) {
 			// explicit check of PropertyType.STRING for some strange found
 			// files
 			hasCount = true;
 			count = (int) DBPFUtil.getUint32(dData, offset, 4);
 			offset += 4;
 		}
-		// System.out.println("Name: " + DBPFUtil.toHexString(id, 8) +
-		// ", Type: "
-		// + DBPFUtil.toHexString(type.id, 4) + ", HasCount: "
-		// + DBPFUtil.toHexString(hasCountLong, 2) + ", Count: " + count);
+//		System.out.println("Name: " + DBPFUtil.toHex(id, 8) + ", Type: " + type
+//				+ " = " + DBPFUtil.toHex(type.id, 4) + ", HasCount: "
+//				+ DBPFUtil.toHex(hasCountLong, 2) + ", Count: " + count);
 
 		DBPFProperty prop = null;
 		try {
 			prop = type.propertyRawConstructor.newInstance(id, count, type,
 					hasCount, dData, offset);
-		} catch (InstantiationException ie) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					ie.getMessage(), ie);
-		} catch (IllegalAccessException iae) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					iae.getMessage(), iae);
-		} catch (IllegalArgumentException iae) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					iae.getMessage(), iae);
-		} catch (InvocationTargetException ite) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					ite.getMessage(), ite);
+		} catch (InstantiationException e) {
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
+		} catch (IllegalAccessException e) {
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
+		} catch (IllegalArgumentException e) {
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
+		} catch (InvocationTargetException e) {
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
 		}
 		if (prop == null) {
 			String message = "Property can not be decoded! ID=0x"
 					+ DBPFUtil.toHex(id, 8) + ", TypeID="
 					+ DBPFUtil.toHex(typeID, 4) + ", HasCount=" + hasCount
 					+ ", Count=" + count;
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE, message);
-			System.err.println(message);
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, message);
 		}
 		return prop;
 	}
@@ -224,7 +257,7 @@ public class DBPFCoder {
 	private static DBPFExemplar createExemplarT(short[] dData) {
 		DBPFExemplar exemplar = new DBPFExemplar();
 		// Read all lines
-		Vector<String> lines = DBPFUtil.getLines(dData, 0x08);
+		List<String> lines = DBPFUtil.getLines(dData, 0x08);
 		// for (String string : lines) {
 		// System.out.println(string);
 		// }
@@ -249,7 +282,7 @@ public class DBPFCoder {
 			propertyList[i] = prop;
 		}
 		exemplar.setPropertyList(propertyList);
-		exemplar.setFormat(DBPFUtil.FORMAT_TEXT);
+		exemplar.setFormat(DBPFConstant.FORMAT_TEXT);
 		return exemplar;
 	}
 
@@ -271,7 +304,8 @@ public class DBPFCoder {
 
 		// now analyze the value
 		String[] propValues = tokens[1].split(":");
-		PropertyType type = PropertyType.valueOf(propValues[0].toUpperCase());
+		DBPFPropertyTypes type = DBPFPropertyTypes.valueOf(propValues[0]
+				.toUpperCase());
 
 		int count = Integer.parseInt(propValues[1]);
 		boolean hasCount = true;
@@ -289,26 +323,21 @@ public class DBPFCoder {
 		try {
 			prop = type.propertyTextConstructor.newInstance(id, count, type,
 					hasCount, data);
-		} catch (InstantiationException ie) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					ie.getMessage(), ie);
-		} catch (IllegalAccessException iae) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					iae.getMessage(), iae);
-		} catch (IllegalArgumentException iae) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					iae.getMessage(), iae);
-		} catch (InvocationTargetException ite) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					ite.getMessage(), ite);
-		}		
+		} catch (InstantiationException e) {
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
+		} catch (IllegalAccessException e) {
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
+		} catch (IllegalArgumentException e) {
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
+		} catch (InvocationTargetException e) {
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
+		}
 		if (prop == null) {
 			String message = "Property can not be decoded! ID=0x"
 					+ DBPFUtil.toHex(id, 8) + ", TypeID="
 					+ DBPFUtil.toHex(type.id, 4) + ", HasCount=" + hasCount
 					+ ", Count=" + count;
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE, message);
-			System.err.println(message);
+			DBPFUtil.toLog("DBPFCoder", Level.SEVERE, message);
 		}
 		return prop;
 	}
@@ -365,8 +394,30 @@ public class DBPFCoder {
 	}
 
 	// ************************************************************************
-	// ENCODING
+	// ENCODING, from DBPFType to short[]
 	// ************************************************************************
+
+	/**
+	 * Create the data for the given cohort.<br>
+	 * 
+	 * @param cohort
+	 *            The cohort
+	 * @param format
+	 *            DBPFUtil.MAGICNUMBER_B_FORMAT or T_FORMAT
+	 * @return The data
+	 */
+	public static short[] createCohortData(DBPFCohort cohort, short format) {
+		if (format == DBPFConstant.FORMAT_BINARY) {
+			short[] data = createExemplarDataB(new DBPFExemplar(cohort));
+			DBPFUtil.setChars(DBPFConstant.MAGICNUMBER_CQZ, data, 0x00);
+			return data;
+		} else if (format == DBPFConstant.FORMAT_TEXT) {
+			short[] data = createExemplarDataT(new DBPFExemplar(cohort));
+			DBPFUtil.setChars(DBPFConstant.MAGICNUMBER_CQZ, data, 0x00);
+			return data;
+		}
+		return null;
+	}
 
 	/**
 	 * Create the data for the given exemplar.<br>
@@ -378,9 +429,9 @@ public class DBPFCoder {
 	 * @return The data
 	 */
 	public static short[] createExemplarData(DBPFExemplar exemplar, short format) {
-		if (format == DBPFUtil.FORMAT_BINARY) {
+		if (format == DBPFConstant.FORMAT_BINARY) {
 			return createExemplarDataB(exemplar);
-		} else if (format == DBPFUtil.FORMAT_TEXT) {
+		} else if (format == DBPFConstant.FORMAT_TEXT) {
 			return createExemplarDataT(exemplar);
 		}
 		return null;
@@ -398,8 +449,8 @@ public class DBPFCoder {
 	private static short[] createExemplarDataB(DBPFExemplar exemplar) {
 		DBPFProperty[] propList = exemplar.getPropertyList();
 		short[] data = new short[DBPFCoder.calcExemplarDataLength(exemplar)];
-		DBPFUtil.setChars(DBPFUtil.MAGICNUMBER_EQZ, data, 0x00);
-		DBPFUtil.setUint32(DBPFUtil.FORMAT_BINARY, data, 0x03, 1);
+		DBPFUtil.setChars(DBPFConstant.MAGICNUMBER_EQZ, data, 0x00);
+		DBPFUtil.setUint32(DBPFConstant.FORMAT_BINARY, data, 0x03, 1);
 		long unknown1 = 0x31;
 		DBPFUtil.setUint32(unknown1, data, 0x04, 1);
 		long unknown2 = 0x232323;
@@ -430,9 +481,9 @@ public class DBPFCoder {
 	 */
 	private static short[] createExemplarDataT(DBPFExemplar exemplar) {
 		final String CRLF = "\r\n";
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		// Header
-		sb.append(DBPFUtil.MAGICNUMBER_EQZ);
+		sb.append(DBPFConstant.MAGICNUMBER_EQZ);
 		sb.append("T1###");
 		sb.append(CRLF);
 		// Parent Cohort Key
@@ -455,8 +506,7 @@ public class DBPFCoder {
 				sb.append(propList[i].toText());
 				sb.append(CRLF);
 			} catch (IOException e) {
-				Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-						e.getMessage(), e);
+				DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
 			}
 		}
 		short[] data = new short[sb.length()];
@@ -474,15 +524,14 @@ public class DBPFCoder {
 	 * @return The array
 	 */
 	public static short[] createPropertyData(DBPFProperty prop, short format) {
-		if (format == DBPFUtil.FORMAT_BINARY) {
+		if (format == DBPFConstant.FORMAT_BINARY) {
 			return prop.toRaw();
-		} else if (format == DBPFUtil.FORMAT_TEXT) {
+		} else if (format == DBPFConstant.FORMAT_TEXT) {
 			String s = "";
 			try {
 				s = prop.toText();
 			} catch (IOException e) {
-				Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-						e.getMessage(), e);
+				DBPFUtil.toLog("DBPFCoder", Level.SEVERE, e.getMessage());
 			}
 			short[] retData = new short[s.length()];
 			for (int i = 0; i < retData.length; i++) {
@@ -505,6 +554,32 @@ public class DBPFCoder {
 	public static int calcExemplarDataLength(DBPFExemplar exemplar) {
 		int dataLength = 0x18;
 		DBPFProperty[] propList = exemplar.getPropertyList();
+		for (DBPFProperty prop : propList) {
+			// Updates the hasCount
+			if (prop.getCount() > 1) {
+				// if more than one value
+				prop.setHasCount(true);
+			} else if (!prop.hasCount()) {
+				// if hasCount not already set
+				prop.setHasCount(false);
+			}
+			dataLength += prop.getBinaryLength();
+		}
+		return dataLength;
+	}
+
+	/**
+	 * Returns the data length for the given exemplar after calculating.<br>
+	 * 
+	 * The length is for the Binary-format (0x42).
+	 * 
+	 * @param cohort
+	 *            The Cohort
+	 * @return The length in bytes
+	 */
+	public static int calcCohortDataLength(DBPFCohort cohort) {
+		int dataLength = 0x18;
+		DBPFProperty[] propList = cohort.getPropertyList();
 		for (DBPFProperty prop : propList) {
 			// Updates the hasCount
 			if (prop.getCount() > 1) {

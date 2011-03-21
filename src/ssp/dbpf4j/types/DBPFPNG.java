@@ -1,5 +1,7 @@
 package ssp.dbpf4j.types;
 
+import ssp.dbpf4j.tgi.TGIKeys;
+
 /**
  * Defines a PNG of DBPF.<br>
  * 
@@ -23,7 +25,7 @@ public class DBPFPNG extends AbstractDBPFType {
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
 		sb.append(", ");
 		sb.append("ImageData-Size: " + imageData.length);
@@ -52,6 +54,6 @@ public class DBPFPNG extends AbstractDBPFType {
 
 	@Override
 	public int getType() {
-		return DBPFTypes.PNG;
+		return TGIKeys.PNG.getFormatID();
 	}
 }

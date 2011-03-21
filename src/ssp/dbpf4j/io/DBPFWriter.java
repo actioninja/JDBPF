@@ -4,31 +4,38 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Vector;
+import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import ssp.dbpf4j.DBPFFile;
+import ssp.dbpf4j.DBPFContainer;
 import ssp.dbpf4j.entries.DBPFEntry;
+import ssp.dbpf4j.format.DBPFCoder;
 import ssp.dbpf4j.format.DBPFConverter;
+import ssp.dbpf4j.tgi.TGIKey;
+import ssp.dbpf4j.types.DBPFLText;
+import ssp.dbpf4j.types.DBPFLUA;
 import ssp.dbpf4j.types.DBPFType;
+import ssp.dbpf4j.util.DBPFConstant;
 import ssp.dbpf4j.util.DBPFUtil;
 
 /**
  * Writes the DBPF format.<br>
  * 
  * @author Stefan Wertich
- * @version 1.5.0, 24.08.2010
+ * @version 1.6.0, 07.01.2011
  * 
  */
 public class DBPFWriter {
 
 	/**
 	 * Constructor.<br>
+	 * 
+	 * PRIVATE to prevent instance.
 	 */
-	public DBPFWriter() {
+	private DBPFWriter() {
 	}
 
 	/**
@@ -43,24 +50,24 @@ public class DBPFWriter {
 	 *            The list of DBPFType to write to file
 	 * @return TRUE, if successful written; FALSE, otherwise
 	 */
-	public boolean write(File filename, Vector<DBPFType> writeList) {
+	public static boolean write(File filename, List<DBPFType> writeList) {
 
 		// Updates the directory of the writeList
-		DBPFConverter.updateDirectory(writeList);
+		DBPFUpdater.updateDirectory(writeList);
 
 		RandomAccessFile raf = null;
 		try {
 			raf = new RandomAccessFile(filename, "rw");
 
 			// create necessary file data
-			String fileType = DBPFUtil.MAGICNUMBER_DBPF;
+			String fileType = DBPFConstant.MAGICNUMBER_DBPF;
 			long majorVersion = 1;
 			long minorVersion = 0;
 			long dateCreated = System.currentTimeMillis() / 1000;
 			long dateModified = System.currentTimeMillis() / 1000;
 			long indexType = 7;
 			long indexEntryCount = writeList.size();
-			long indexOffsetLocation = DBPFFile.HEADER_SIZE;
+			long indexOffsetLocation = DBPFConstant.HEADERSIZE_DBPF;
 			long indexSize = 5 * 4 * indexEntryCount;
 
 			// set minimum file size
@@ -95,10 +102,10 @@ public class DBPFWriter {
 
 			// Write index
 			for (int i = 0; i < writeList.size(); i++) {
-				long[] tgi = writeList.get(i).getTGI();
-				writeUINT32(raf, tgi[0], 4);
-				writeUINT32(raf, tgi[1], 4);
-				writeUINT32(raf, tgi[2], 4);
+				TGIKey tgiKey = writeList.get(i).getTGIKey();
+				writeUINT32(raf, tgiKey.getTID(), 4);
+				writeUINT32(raf, tgiKey.getGID(), 4);
+				writeUINT32(raf, tgiKey.getIID(), 4);
 				writeUINT32(raf, offsetList[i], 4);
 				writeUINT32(raf, sizeList[i], 4);
 			}
@@ -109,19 +116,16 @@ public class DBPFWriter {
 
 			raf.close();
 		} catch (FileNotFoundException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFWriter] File not found: " + filename, e);
+			DBPFUtil.toLog("DBPFWriter", Level.SEVERE, e.getMessage());
 			return false;
 		} catch (IOException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFWriter] IOException for file: " + filename, e);
+			DBPFUtil.toLog("DBPFWriter", Level.SEVERE, e.getMessage());
 			return false;
 		} finally {
 			try {
 				raf.close();
 			} catch (IOException e) {
-				Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-						"[DBPFWriter] IOException for file: " + filename, e);
+				DBPFUtil.toLog("DBPFWriter", Level.SEVERE, e.getMessage());
 			}
 		}
 		return true;
@@ -137,7 +141,8 @@ public class DBPFWriter {
 	 * @throws IOException
 	 *             Thown, if error occur
 	 */
-	public void writeChars(RandomAccessFile raf, String s) throws IOException {
+	public static void writeChars(RandomAccessFile raf, String s)
+			throws IOException {
 		for (int i = 0; i < s.length(); i++) {
 			raf.write(s.charAt(i));
 		}
@@ -158,7 +163,7 @@ public class DBPFWriter {
 	 * @throws IOException
 	 *             If error occur
 	 */
-	public void writeUINT32(RandomAccessFile raf, long value, int size)
+	public static void writeUINT32(RandomAccessFile raf, long value, int size)
 			throws IOException {
 		for (int i = 0; i < size; i++) {
 			long rest = value % 256;
@@ -195,11 +200,9 @@ public class DBPFWriter {
 			raf.close();
 			return true;
 		} catch (FileNotFoundException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFWriter] File not found: " + filename, e);
+			DBPFUtil.toLog("DBPFWriter", Level.SEVERE, e.getMessage());
 		} catch (IOException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFWriter] IOException for file: " + filename, e);
+			DBPFUtil.toLog("DBPFWriter", Level.SEVERE, e.getMessage());
 		}
 		return false;
 	}
@@ -228,12 +231,93 @@ public class DBPFWriter {
 			bos.close();
 			return true;
 		} catch (FileNotFoundException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFWriter] File not found: " + filename, e);
+			DBPFUtil.toLog("DBPFWriter", Level.SEVERE, e.getMessage());
 		} catch (IOException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFWriter] IOException for file: " + filename, e);
+			DBPFUtil.toLog("DBPFWriter", Level.SEVERE, e.getMessage());
 		}
 		return false;
+	}
+
+	// ***********************************************************************
+	// DBPFContainer
+	// ***********************************************************************
+
+	/**
+	 * Writes the container to file.<br>
+	 * 
+	 * @param container
+	 *            The DBPFContainer
+	 * @return TRUE, if written; FALSE, if error
+	 */
+	public static boolean writeContainer(DBPFContainer container) {
+		if (container != null) {
+			return DBPFWriter.write(container.getFilename(),
+					container.getTypeList());
+		}
+		return false;
+	}
+
+	// ***********************************************************************
+	// SPECIAL
+	// ***********************************************************************
+
+	/**
+	 * Saves the data to a text file.<br>
+	 * The data can be saved as simple ASCII or UNICODE text. For ASCII it uses
+	 * DBPFLUA, for UNICODE it uses DBPFLTEXT.
+	 * 
+	 * @param filename
+	 *            The filename
+	 * @param data
+	 *            The data
+	 * @param unicode
+	 *            TRUE, if saving as UNICODE; FALSE, for ASCII
+	 */
+	public static void writeText(File filename, List<String> data,
+			boolean unicode) {
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < data.size(); i++) {
+			sb.append(data.get(i));
+			sb.append(DBPFUtil.CRLF);
+		}
+		String dataText = sb.toString();
+
+		short[] rawData = new short[0];
+		if (unicode) {
+			DBPFLText text = new DBPFLText();
+			text.setCompressed(false);
+			text.setString(dataText);
+			rawData = DBPFCoder.createLTextData(text);
+		} else {
+			DBPFLUA text = new DBPFLUA();
+			text.setCompressed(false);
+			text.setString(dataText);
+			rawData = DBPFCoder.createLUAData(text);
+		}
+		DBPFWriter.writeRawData(filename, rawData);
+
+	}
+
+	/**
+	 * Saves the TGI file with the given TGI.<br>
+	 * 
+	 * @param filename
+	 *            The filename to save to
+	 * @param tgiKey
+	 *            The TGIKey
+	 */
+	public static void writeTGI(File filename, TGIKey tgiKey) {
+		FileWriter fw;
+		try {
+			fw = new FileWriter(filename);
+			fw.write(DBPFUtil.toHex(tgiKey.getTID(), 8) + DBPFUtil.CRLF
+					+ DBPFUtil.toHex(tgiKey.getGID(), 8) + DBPFUtil.CRLF
+					+ DBPFUtil.toHex(tgiKey.getIID(), 8) + DBPFUtil.CRLF);
+			fw.flush();
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

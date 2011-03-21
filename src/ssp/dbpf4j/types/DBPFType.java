@@ -1,16 +1,25 @@
 package ssp.dbpf4j.types;
 
+import ssp.dbpf4j.tgi.TGIKey;
+
 /**
  * Defines an interface for all DBPFTypes.<br>
+ * <br>
+ * The following types are currently supported:<br>
+ * <ol>
+ * <li>EQZB1 = Binary format</li>
+ * <li>EQZT1 = Text format</li>
+ * </ol>
  * 
  * @author Stefan Wertich
- * @version 1.5.0, 24.08.2010
+ * @version 1.6.0, 29.12.2010
  * 
  */
 public interface DBPFType {
 
 	/**
-	 * @param decompressedSize the uncompressedSize to set
+	 * @param decompressedSize
+	 *            the uncompressedSize to set
 	 */
 	public void setDecompressedSize(long decompressedSize);
 
@@ -18,7 +27,7 @@ public interface DBPFType {
 	 * @return the uncompressedSize
 	 */
 	public long getDecompressedSize();
-	
+
 	/**
 	 * This flag signalize, if the file should be compressed.<br>
 	 * 
@@ -34,14 +43,6 @@ public interface DBPFType {
 	public boolean isCompressed();
 
 	/**
-	 * Gives detail information about type.<br>
-	 * Consists of toString() and more information.
-	 * 
-	 * @return A detail string
-	 */
-	public String toDetailString();
-
-	/**
 	 * Returns the specific type of this type.<br>
 	 * 
 	 * @return The type
@@ -50,38 +51,37 @@ public interface DBPFType {
 
 	/**
 	 * Sets the TGI of this type.<br>
-	 * Normally from entry.
 	 * 
-	 * @param tgi
-	 *            The TGI
+	 * @param tgiKey
+	 *            The TGIKey
 	 */
-	public void setTGI(long[] tgi);
+	public void setTGIKey(TGIKey tgiKey);
 
 	/**
-	 * Returns the TGI.<br>
+	 * Returns the TGI of this type.<br>
 	 * 
 	 * @return The TGI
 	 */
-	public long[] getTGI();
+	public TGIKey getTGIKey();
 	
 	/**
-	 * Returns the TypeID.<br>
+	 * Returns the TID.<br>
 	 * 
-	 * @return The typeID
+	 * @return The TID
 	 */
 	public long getTID();
 
 	/**
-	 * Returns the GroupID.<br>
+	 * Returns the GID.<br>
 	 * 
-	 * @return The groupID
+	 * @return The GID
 	 */
 	public long getGID();
 
 	/**
-	 * Returns the InstanceID.<br>
+	 * Returns the IID.<br>
 	 * 
-	 * @return The instanceID
+	 * @return The IID
 	 */
 	public long getIID();
 

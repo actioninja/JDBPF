@@ -4,6 +4,16 @@ import java.io.IOException;
 
 /**
  * Defines a property of a DBPFType.<br>
+ * <br>
+ * The property consists of the following byte data:<br>
+ * <ol>
+ * <li>byte{4} NameValue/ID</li>
+ * <li>byte{2} DataType</li>
+ * <li>byte{1} RepIs? (80=Yes, 00=No)</li>
+ * <li>byte{2} Unknown (00 00)</li>
+ * <li>byte{4} RepSize, if RepIs=Yes</li>
+ * <li>byte{x} Values</li>
+ * </ol>
  * 
  * @author Stefan Wertich
  * @version 1.5.0, 25.08.2010
@@ -137,7 +147,8 @@ public interface DBPFProperty {
 	 * The data is in the text-format (0x54), e.g.:<br>
 	 * 0x00000010:{"Exemplar Type"}=Uint32:0:{0x00000002}
 	 * 
-	 * @throws IOException, if error creating the text
+	 * @throws IOException
+	 *             , if error creating the text
 	 */
 	public String toText() throws IOException;
 
@@ -162,7 +173,7 @@ public interface DBPFProperty {
 	 * @return the PropertyType constant indicating what kind of data this
 	 *         property stores.
 	 */
-	public PropertyType getType();
+	public DBPFPropertyTypes getType();
 
 	/**
 	 * Sets the type of data stored in this property.
@@ -170,7 +181,7 @@ public interface DBPFProperty {
 	 * @param type
 	 *            the type of data stored in this property
 	 */
-	public void setType(PropertyType type);
+	public void setType(DBPFPropertyTypes type);
 
 	/**
 	 * Retrieves how many items are in this property's value. Normally, this

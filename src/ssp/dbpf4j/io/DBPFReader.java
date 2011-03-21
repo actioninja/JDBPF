@@ -7,25 +7,30 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import ssp.dbpf4j.DBPFContainer;
 import ssp.dbpf4j.DBPFFile;
 import ssp.dbpf4j.entries.DBPFEntry;
+import ssp.dbpf4j.format.DBPFConverter;
+import ssp.dbpf4j.tgi.TGIKey;
+import ssp.dbpf4j.util.DBPFConstant;
 import ssp.dbpf4j.util.DBPFUtil;
 
 /**
  * Reads the DBPF format.<br>
  * 
  * @author Stefan Wertich
- * @version 1.5.0, 26.08.2010
+ * @version 1.6.0, 05.01.2011, modified 07.01.2011
  * 
  */
 public class DBPFReader {
 
 	/**
 	 * Constructor.<br>
+	 * 
+	 * PRIVATE to prevent instance.
 	 */
-	public DBPFReader() {
+	private DBPFReader() {
 	}
 
 	/**
@@ -35,19 +40,17 @@ public class DBPFReader {
 	 *            The filename
 	 * @return TRUE, if file is a DBPF file; FALSE, if not or error occur
 	 */
-	public boolean checkFileType(File filename) {
+	public static boolean checkFileType(File filename) {
 		try {
 			RandomAccessFile raf = new RandomAccessFile(filename, "r");
 			String fileType = readChars(raf, 4);
-			if (fileType.equals(DBPFUtil.MAGICNUMBER_DBPF)) {
+			if (fileType.equals(DBPFConstant.MAGICNUMBER_DBPF)) {
 				return true;
 			}
 		} catch (FileNotFoundException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFReader] File not found: " + filename, e);
+			DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 		} catch (IOException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFReader] IOException for file: " + filename, e);
+			DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 		}
 		return false;
 	}
@@ -59,7 +62,7 @@ public class DBPFReader {
 	 *            The filename of the DBPF file
 	 * @return The file object or NULL, if file not found or error
 	 */
-	public DBPFFile read(File filename) {
+	public static DBPFFile read(File filename) {
 		// to store the entries of the file
 		DBPFFile dbpfFile = new DBPFFile();
 
@@ -73,7 +76,7 @@ public class DBPFReader {
 
 			// Analyze the fileType
 			String fileType = readChars(raf, 4);
-			if (fileType.equals(DBPFUtil.MAGICNUMBER_DBPF)) {
+			if (fileType.equals(DBPFConstant.MAGICNUMBER_DBPF)) {
 				long majorVersion = readUint32(raf, 4);
 				long minorVersion = readUint32(raf, 4);
 				raf.skipBytes(12);
@@ -101,11 +104,11 @@ public class DBPFReader {
 					long iid = readUint32(raf, 4);
 					long offset = readUint32(raf, 4);
 					long size = readUint32(raf, 4);
-					DBPFEntry entry = new DBPFEntry(tid, gid, iid);
+					DBPFEntry entry = new DBPFEntry(new TGIKey(tid, gid, iid));
 					entry.setOffset(offset);
 					entry.setSize(size);
 					entry.setFilename(filename);
-					dbpfFile.getEntryList().addElement(entry);
+					dbpfFile.addEntry(entry);
 
 					// System.out.println(entry.toString());
 				}
@@ -113,19 +116,16 @@ public class DBPFReader {
 				dbpfFile = null;
 			}
 		} catch (FileNotFoundException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFReader] File not found: " + filename, e);
+			DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 			dbpfFile = null;
 		} catch (IOException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFReader] IOException for file: " + filename, e);
+			DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 			dbpfFile = null;
 		} finally {
 			try {
 				raf.close();
 			} catch (IOException e) {
-				Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-						"[DBPFReader] IOException for file: " + filename, e);
+				DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 			}
 		}
 		return dbpfFile;
@@ -142,9 +142,9 @@ public class DBPFReader {
 	 * @throws IOException
 	 *             Thrown, if error occur
 	 */
-	public String readChars(RandomAccessFile raf, int length)
+	public static String readChars(RandomAccessFile raf, int length)
 			throws IOException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int readed = 0;
 		for (int i = 0; i < length; i++) {
 			readed = raf.read();
@@ -166,7 +166,8 @@ public class DBPFReader {
 	 * @throws IOException
 	 *             Thrown, if error occur
 	 */
-	public long readUint32(RandomAccessFile raf, int length) throws IOException {
+	public static long readUint32(RandomAccessFile raf, int length)
+			throws IOException {
 		long sum = 0;
 		for (int i = 0; i < length; i++) {
 			int readed = raf.read();
@@ -195,11 +196,9 @@ public class DBPFReader {
 			}
 			raf.close();
 		} catch (FileNotFoundException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFReader] File not found: " + filename, e);
+			DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 		} catch (IOException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFReader] IOException for file: " + filename, e);
+			DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 		}
 		return data;
 	}
@@ -224,12 +223,32 @@ public class DBPFReader {
 			}
 			bis.close();
 		} catch (FileNotFoundException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFReader] File not found: " + filename, e);
+			DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 		} catch (IOException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[DBPFReader] IOException for file: " + filename, e);
+			DBPFUtil.toLog("DBPFReader", Level.SEVERE, e.getMessage());
 		}
 		return rawData;
+	}
+
+	// ***********************************************************************
+	// DBPFContainer
+	// ***********************************************************************
+
+	/**
+	 * Reads the entrys and stores them in a container.<br>
+	 * 
+	 * @param filename
+	 *            The filename
+	 * @return The container
+	 */
+	public static DBPFContainer readContainer(File filename) {
+		DBPFFile dbpfFile = DBPFReader.read(filename);
+
+		DBPFContainer dbpfCont = new DBPFContainer();
+		dbpfCont.setFilename(filename);
+		for (DBPFEntry entry : dbpfFile.getEntryList()) {
+			dbpfCont.addType(DBPFConverter.createType(entry));
+		}
+		return dbpfCont;
 	}
 }

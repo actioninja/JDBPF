@@ -1,10 +1,11 @@
 package ssp.dbpf4j.format;
 
-import java.util.Vector;
 
-import ssp.dbpf4j.entries.DBPFEntries;
 import ssp.dbpf4j.entries.DBPFEntry;
 import ssp.dbpf4j.io.DBPFReader;
+import ssp.dbpf4j.tgi.TGIKey;
+import ssp.dbpf4j.tgi.TGIKeys;
+import ssp.dbpf4j.types.DBPFCohort;
 import ssp.dbpf4j.types.DBPFDirectory;
 import ssp.dbpf4j.types.DBPFExemplar;
 import ssp.dbpf4j.types.DBPFLText;
@@ -13,24 +14,23 @@ import ssp.dbpf4j.types.DBPFPNG;
 import ssp.dbpf4j.types.DBPFRUL;
 import ssp.dbpf4j.types.DBPFRaw;
 import ssp.dbpf4j.types.DBPFType;
-import ssp.dbpf4j.types.DBPFTypes;
-import ssp.dbpf4j.util.DBPFUtil;
-import ssp.dbpf4j.util.DBPFUtil2;
 
 /**
  * This class provide functions to convert between DBPFEntry, DBPFType and
  * RawData.<br>
  * 
  * @author Stefan Wertich
- * @version 1.3.0, 15.11.2009
+ * @version 1.6.0, 28.12.2010
  * 
  */
 public class DBPFConverter {
 
 	/**
 	 * Constructor.<br>
+	 * 
+	 * PRIVATE to prevent instance.
 	 */
-	public DBPFConverter() {
+	private DBPFConverter() {
 	}
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -64,7 +64,7 @@ public class DBPFConverter {
 	 * @return The DBPFRaw
 	 */
 	public static DBPFType createType(DBPFEntry entry, boolean onlyRawType) {
-		long[] tgi = entry.getTGI();
+		TGIKey tgiKey = entry.getTGIKey();
 		// System.out.println("Entry: "+entry.toString()+","+entry.getFilename());
 		// read rawdata from entry
 		short[] data = DBPFReader.readData(entry);
@@ -73,7 +73,7 @@ public class DBPFConverter {
 
 		if (onlyRawType) {
 			DBPFRaw type = new DBPFRaw();
-			type.setTGI(tgi);
+			type.setTGIKey(tgiKey);
 			type.setData(data);
 			type.setCompressed(packager.isCompressed());
 			type.setDecompressedSize(packager.getDecompressedSize());
@@ -81,27 +81,29 @@ public class DBPFConverter {
 		}
 
 		DBPFType type = null;
-		if (DBPFUtil2.isTGI(tgi, DBPFEntries.EXEMPLAR)) {
+		if (tgiKey.equals(TGIKeys.EXEMPLAR)) {
 			type = DBPFCoder.createExemplar(dData);
-		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.PNG)) {
+		} else if(tgiKey.equals(TGIKeys.COHORT)) {
+            type = DBPFCoder.createCohort(dData);
+        } else if (tgiKey.equals(TGIKeys.PNG)) {
 			type = new DBPFPNG();
 			((DBPFPNG) type).setImageData(dData);
-		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.WAV)) {
+		} else if (tgiKey.equals(TGIKeys.WAV)) {
 			// FIXME not implemented yet, so use DBPFRaw
 			type = null;
-		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.LTEXT)) {
+		} else if (tgiKey.equals(TGIKeys.LTEXT)) {
 			type = DBPFCoder.createLText(dData);
-		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.DIRECTORY)) {
+		} else if (tgiKey.equals(TGIKeys.DIRECTORY)) {
 			type = new DBPFDirectory();
 			((DBPFDirectory) type).setData(data);
-		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.LUA)) {
+		} else if (tgiKey.equals(TGIKeys.LUA)) {
 			type = DBPFCoder.createLUA(dData);
-		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.RUL)) {
+		} else if (tgiKey.equals(TGIKeys.RUL)) {
 			type = DBPFCoder.createRUL(dData);
-		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.FSH)) {
+		} else if (tgiKey.equals(TGIKeys.FSH)) {
 			// FIXME not implemented yet, so use DBPFRaw
 			type = null;
-		} else if (DBPFUtil2.isTGI(tgi, DBPFEntries.S3D)) {
+		} else if (tgiKey.equals(TGIKeys.S3D)) {
 			// FIXME not implemented yet, so use DBPFRaw
 			type = null;
 		}
@@ -110,7 +112,7 @@ public class DBPFConverter {
 			type = new DBPFRaw();
 			((DBPFRaw) type).setData(data);
 		}
-		type.setTGI(tgi);
+		type.setTGIKey(tgiKey);
 		type.setCompressed(packager.isCompressed());
 		type.setDecompressedSize(packager.getDecompressedSize());
 		return type;
@@ -125,7 +127,7 @@ public class DBPFConverter {
 	 * @return The exemplar or NULL
 	 */
 	public static DBPFExemplar createExemplar(DBPFEntry entry) {
-		if (DBPFUtil2.isTGI(entry.getTGI(), DBPFEntries.EXEMPLAR)) {
+		if (entry.getTGIKey().equals(TGIKeys.EXEMPLAR)) {
 			DBPFType type = DBPFConverter.createType(entry);
 			if (type instanceof DBPFExemplar) {
 				return (DBPFExemplar) type;
@@ -133,6 +135,24 @@ public class DBPFConverter {
 		}
 		return null;
 	}
+	
+	/**
+     * Create a cohort from the given entry. If the entry is not a cohort
+     * or the cohort could not be created this return null.
+     *
+     * @param entry
+     *            The entry
+     * @return The cohort or NULL
+     */
+    public static DBPFCohort createCohort(DBPFEntry entry) {
+        if(entry.getTGIKey().equals(TGIKeys.COHORT)) {
+            DBPFType type = DBPFConverter.createType(entry);
+            if(type instanceof DBPFCohort) {
+                return (DBPFCohort) type;
+            }
+        }
+        return null;
+    }
 
 	/**
 	 * Create a PNG from the given entry. If the entry is not a PNG or the PNG
@@ -143,7 +163,7 @@ public class DBPFConverter {
 	 * @return The PNG or NULL
 	 */
 	public static DBPFPNG createPNG(DBPFEntry entry) {
-		if (DBPFUtil2.isTGI(entry.getTGI(), DBPFEntries.PNG)) {
+		if (entry.getTGIKey().equals(TGIKeys.PNG)) {
 			DBPFType type = DBPFConverter.createType(entry);
 			if (type instanceof DBPFPNG) {
 				return (DBPFPNG) type;
@@ -161,7 +181,7 @@ public class DBPFConverter {
 	 * @return The LText or NULL
 	 */
 	public static DBPFLText createLTEXT(DBPFEntry entry) {
-		if (DBPFUtil2.isTGI(entry.getTGI(), DBPFEntries.LTEXT)) {
+		if (entry.getTGIKey().equals(TGIKeys.LTEXT)) {
 			DBPFType type = DBPFConverter.createType(entry);
 			if (type instanceof DBPFLText) {
 				return (DBPFLText) type;
@@ -182,32 +202,33 @@ public class DBPFConverter {
 	 * @return The data
 	 */
 	public static short[] createData(DBPFType type) {
+		int formatID = type.getType();
 		short[] data = new short[0];
-		if (type.getType() == DBPFTypes.EXEMPLAR) {
+		if (formatID == TGIKeys.EXEMPLAR.getFormatID()) {
 			DBPFExemplar exem = (DBPFExemplar) type;
 			data = DBPFCoder.createExemplarData(exem, exem.getFormat());
-		} else if (type.getType() == DBPFTypes.PNG
-				|| type.getType() == DBPFTypes.PNG_ICON) {
+		} else if (formatID == TGIKeys.PNG.getFormatID()
+				|| formatID == TGIKeys.PNG_ICON.getFormatID()) {
 			DBPFPNG png = (DBPFPNG) type;
 			data = png.getImageData();
-		} else if (type.getType() == DBPFTypes.WAV) {
+		} else if (formatID == TGIKeys.WAV.getFormatID()) {
 			// FIXME not implmented yet, so use DBPFRaw
 			DBPFRaw raw = (DBPFRaw) type;
 			data = raw.getData();
-		} else if (type.getType() == DBPFTypes.LTEXT) {
+		} else if (formatID == TGIKeys.LTEXT.getFormatID()) {
 			data = DBPFCoder.createLTextData((DBPFLText) type);
-		} else if (type.getType() == DBPFTypes.DIRECTORY) {
+		} else if (formatID == TGIKeys.DIRECTORY.getFormatID()) {
 			DBPFDirectory dir = (DBPFDirectory) type;
 			data = dir.getData();
-		} else if (type.getType() == DBPFTypes.LUA) {
+		} else if (formatID == TGIKeys.LUA.getFormatID()) {
 			data = DBPFCoder.createLUAData((DBPFLUA) type);
-		} else if (type.getType() == DBPFTypes.RUL) {
+		} else if (formatID == TGIKeys.RUL.getFormatID()) {
 			data = DBPFCoder.createRULData((DBPFRUL) type);
-		} else if (type.getType() == DBPFTypes.FSH) {
+		} else if (formatID == TGIKeys.FSH.getFormatID()) {
 			// FIXME not implmented yet, so use DBPFRaw
 			DBPFRaw raw = (DBPFRaw) type;
 			data = raw.getData();
-		} else if (type.getType() == DBPFTypes.S3D) {
+		} else if (formatID == TGIKeys.S3D.getFormatID()) {
 			// FIXME not implmented yet, so use DBPFRaw
 			DBPFRaw raw = (DBPFRaw) type;
 			data = raw.getData();
@@ -218,65 +239,11 @@ public class DBPFConverter {
 
 		// Compress the known files, if they were compressed,
 		// the unknown are RAW and leave as they was!!!
-		if (type.isCompressed() && (type.getType() != DBPFTypes.RAW)) {
+		if (type.isCompressed() && (formatID != TGIKeys.RAW.getFormatID())) {
 			DBPFPackager packager = new DBPFPackager();
 			data = packager.compress(data);
 		}
 		return data;
-	}
-
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	// Various
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-	/**
-	 * Updates the directory for the given writelist.<br>
-	 * If dir is not in writeList this will add a dir entry. If no compressed
-	 * entrys in writeList this will remove the dir entry.
-	 * 
-	 * @param writeList
-	 *            The writelist
-	 */
-	public static void updateDirectory(Vector<DBPFType> writeList) {
-		DBPFType dir = null;
-		Vector<DBPFType> v = new Vector<DBPFType>();
-		for (DBPFType type : writeList) {
-			if (DBPFUtil2.isTGI(type.getTGI(), DBPFEntries.DIRECTORY)) {
-				dir = type;
-			} else if (type.isCompressed()) {
-				v.addElement(type);
-			}
-		}
-		if (v.size() == 0) {
-			if (dir != null) {
-				writeList.remove(dir);
-			}
-		} else {
-			short[] data = new short[v.size() * 16];
-			int pos = 0x00;
-			for (DBPFType type : v) {
-				long[] tgi = type.getTGI();
-				DBPFUtil.setUint32(tgi[0], data, pos, 4);
-				DBPFUtil.setUint32(tgi[1], data, pos + 4, 4);
-				DBPFUtil.setUint32(tgi[2], data, pos + 8, 4);
-				DBPFUtil.setUint32(type.getDecompressedSize(), data, pos + 12,
-						4);
-				pos += 16;
-			}
-			if (dir != null) {
-				if (dir instanceof DBPFDirectory) {
-					((DBPFDirectory) dir).setData(data);
-				} else {
-					((DBPFRaw) dir).setData(data);
-				}
-			} else {
-				dir = new DBPFDirectory();
-				dir.setCompressed(false);
-				dir.setTGI(DBPFEntries.DIRECTORY);
-				((DBPFDirectory) dir).setData(data);
-				writeList.addElement(dir);
-			}
-		}
 	}
 
 }

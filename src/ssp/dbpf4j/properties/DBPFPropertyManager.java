@@ -1,6 +1,5 @@
 package ssp.dbpf4j.properties;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,94 +22,38 @@ import org.xml.sax.SAXException;
 import ssp.dbpf4j.util.DBPFUtil;
 
 /**
- * Stores the properties for the exemplar.<br>
+ * Reads the properties for the exemplar and stores them.<br>
  * 
  * @author Stefan Wertich
- * @version 1.5.0, 26.08.2010
+ * @version 1.6.0, 03.01.2011, last edited 05.01.2011
  * 
  */
-public class ExemplarProperties {
+public class DBPFPropertyManager {
 
 	// The supported XML formats: iLive's Reader and SC4PIM
 	public static final int XML_FORMAT_READER = 1;
 	public static final int XML_FORMAT_SC4PIM = 2;
 
 	/************************* Some common properties ***************************/
-	public final ExemplarProperty OTHER;
-	public final ExemplarProperty EXEMPLAR_NAME;
-	public final ExemplarProperty EXEMPLAR_TYPE;
+
+	public final DBPFProperties OTHER;
+	public final DBPFProperties EXEMPLAR_NAME;
+	public final DBPFProperties EXEMPLAR_TYPE;
 
 	/**************************************************************************/
-	private static volatile ExemplarProperties currentProperties = null;
+	private static final String PROPERTY_FILE = "resources/properties/properties.xml";
 
-	public final Map<Long, ExemplarProperty> forID;
+	private static volatile DBPFPropertyManager currentProperties = null;
+
+	public final Map<Long, DBPFProperties> forID;
 
 	/**
 	 * The strings are always UPPER_CASE for easier handling
 	 */
-	public final Map<String, ExemplarProperty> forName;
+	public final Map<String, DBPFProperties> forName;
 
-	final Map<Long, ExemplarProperty> modifiableForID = new HashMap<Long, ExemplarProperty>();
-	final Map<String, ExemplarProperty> modifiableForName = new HashMap<String, ExemplarProperty>();
-
-	/**
-	 * Returns the exemplar properties.<br>
-	 * 
-	 * @return The properties or NULL, if not loaded
-	 */
-	public static ExemplarProperties getProperties() {
-		return currentProperties;
-	}
-
-	/**
-	 * Loads the properties from a file and set as current properties.<br>
-	 * 
-	 * @param propertiesFile
-	 *            The properties file
-	 * @param xmlFormat
-	 *            The format of the propertiesFile: XML_FORMAT_READER,
-	 *            XML_FORMAT_PIM
-	 * @return TRUE, if loaded successful; FALSE, otherwise
-	 */
-	public static boolean loadProperties(File propertiesFile, int xmlFormat) {
-		// Try internal property file
-		InputStream is = ExemplarProperties.class.getResourceAsStream("/"
-				+ propertiesFile);
-		// Try external property file
-		if (is == null) {
-			try {
-				is = new FileInputStream(propertiesFile);
-			} catch (FileNotFoundException e) {
-				is = null;
-				// ignore this
-			}
-		}
-
-		if (is != null) {
-			return loadProperties(is, xmlFormat);
-		} else {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(
-					Level.SEVERE,
-					"Can not load Exemplar Properties from file: "
-							+ propertiesFile);
-		}
-		return false;
-	}
-
-	/**
-	 * Loads the Properties from an InputStream and set as current properties.<br>
-	 * 
-	 * @param is
-	 *            The inputStream, may be a FileInputStream or from Resource
-	 * @param xmlFormat
-	 *            The format of the propertiesFile: XML_FORMAT_READER,
-	 *            XML_FORMAT_PIM
-	 * @return TRUE, if loaded successful; FALSE, otherwise
-	 */
-	public static boolean loadProperties(InputStream is, int xmlFormat) {
-		currentProperties = new ExemplarProperties(is, xmlFormat);
-		return (currentProperties != null);
-	}
+	final Map<Long, DBPFProperties> modifiableForID = new HashMap<Long, DBPFProperties>();
+	final Map<String, DBPFProperties> modifiableForName = new HashMap<String, DBPFProperties>();
 
 	/**
 	 * Constructor.<br>
@@ -122,7 +64,7 @@ public class ExemplarProperties {
 	 *            The format of the propertiesFile: XML_FORMAT_READER,
 	 *            XML_FORMAT_PIM
 	 */
-	public ExemplarProperties(InputStream is, int xmlFormat) {
+	public DBPFPropertyManager(InputStream is, int xmlFormat) {
 		forID = Collections.unmodifiableMap(modifiableForID);
 		forName = Collections.unmodifiableMap(modifiableForName);
 
@@ -138,29 +80,83 @@ public class ExemplarProperties {
 			}
 
 		} catch (ParserConfigurationException e) {
-			Logger
-					.getLogger(DBPFUtil.LOGGER_NAME)
-					.log(
-							Level.SEVERE,
-							"[ExemplarProperties] ParserConfigurationException for InputStream",
-							e);
+			DBPFUtil.toLog("DBPFPropertyManager", Level.SEVERE, e.getMessage());
 		} catch (SAXException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[ExemplarProperties] SAXException for InputStream", e);
+			DBPFUtil.toLog("DBPFPropertyManager", Level.SEVERE, e.getMessage());
 		} catch (IOException e) {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(Level.SEVERE,
-					"[ExemplarProperties] IOException for InputStream", e);
+			DBPFUtil.toLog("DBPFPropertyManager", Level.SEVERE, e.getMessage());
 		}
 
 		EXEMPLAR_NAME = forID.get(0x00000020L);
 		EXEMPLAR_TYPE = forID.get(0x00000010L);
 
-		ExemplarProperty tempOther = forID.get(0L);
-
-		if (tempOther == null)
-			tempOther = ExemplarProperty.UNKNOWN;
-
+		DBPFProperties tempOther = forID.get(0L);
+		if (tempOther == null) {
+			tempOther = DBPFProperties.UNKNOWN;
+		}
 		OTHER = tempOther;
+	}
+
+	/**
+	 * Returns the exemplar properties.<br>
+	 * 
+	 * If the properties NULL, it will first try to load them from the standard
+	 * property file.
+	 * 
+	 * @return The properties or NULL, if could not loaded
+	 */
+	public static DBPFPropertyManager getProperties() {
+		if (currentProperties == null) {
+			loadProperties();
+		}
+		return currentProperties;
+	}
+
+	/**
+	 * Returns the first value for the given key.<br>
+	 * If the key can not be found, it returns 'UNKNOWN'.
+	 * 
+	 * @param key
+	 *            The key
+	 * @return The value or NULL, if not found
+	 */
+	public static String getString(long key) {
+		DBPFPropertyManager props = getProperties();
+		if (props != null) {
+			Map<Long, DBPFProperties> map = props.forID;
+			if (map != null) {
+				DBPFProperties prop = map.get(key);
+				if (prop != null) {
+					return prop.getName();
+				}
+			}
+		}
+		DBPFUtil.toLog("DBPFPropertyManager", Level.WARNING,
+				"Can not find the prop/name for: " + DBPFUtil.toHex(key, 8));
+		return "UNKNOWN";
+	}
+
+	/**
+	 * Returns the first key, which has the given value.<br>
+	 * 
+	 * @param value
+	 *            The value
+	 * @return The key or -1, if not found
+	 */
+	public static long getKey(String value) {
+		DBPFPropertyManager props = getProperties();
+		if (props != null) {
+			Map<String, DBPFProperties> map = props.forName;
+			if (map != null) {
+				DBPFProperties prop = map.get(value);
+				if (prop != null) {
+					return prop.getId();
+				}
+			}
+		}
+		DBPFUtil.toLog("DBPFPropertyManager", Level.WARNING,
+				"Can not find the prop/key for: " + value);
+		return -1;
 	}
 
 	/**
@@ -234,8 +230,7 @@ public class ExemplarProperties {
 			Node nType = map.getNamedItem("type");
 			String idStr = nID.getNodeValue();
 			if (!idStr.startsWith("0x") || idStr.length() != 10) {
-				Logger.getLogger(DBPFUtil.LOGGER_NAME).log(
-						Level.SEVERE,
+				DBPFUtil.toLog("DBPFPropertyManager", Level.SEVERE,
 						"NumberFormatException for ID of Exemplar property: "
 								+ idStr);
 			} else {
@@ -243,9 +238,9 @@ public class ExemplarProperties {
 				String name = nName.getNodeValue().trim();
 				String sType = nType.getNodeValue().trim().toUpperCase();
 				// System.out.println(DBPFUtil.toHex(id,8) + "," + name);
-				PropertyType type = PropertyType.valueOf(sType);
+				DBPFPropertyTypes type = DBPFPropertyTypes.valueOf(sType);
 				//
-				ExemplarProperty exemProp = new ExemplarProperty(id, name, type);
+				DBPFProperties exemProp = new DBPFProperties(id, name, type);
 				modifiableForID.put(exemProp.getId(), exemProp);
 				modifiableForName.put(exemProp.getName().toUpperCase(),
 						exemProp);
@@ -303,8 +298,7 @@ public class ExemplarProperties {
 			if (nID != null && nName != null && nType != null) {
 				String idStr = nID.getNodeValue();
 				if (!idStr.startsWith("0x") || idStr.length() != 10) {
-					Logger.getLogger(DBPFUtil.LOGGER_NAME).log(
-							Level.SEVERE,
+					DBPFUtil.toLog("DBPFPropertyManager", Level.SEVERE,
 							"NumberFormatException for ID of Exemplar property: "
 									+ idStr);
 				} else {
@@ -312,20 +306,81 @@ public class ExemplarProperties {
 					String name = nName.getNodeValue().trim();
 					String sType = nType.getNodeValue().trim().toUpperCase();
 					// System.out.println(DBPFUtil.toHex(id,8) + "," + name);
-					PropertyType type = PropertyType.valueOf(sType);
+					DBPFPropertyTypes type = DBPFPropertyTypes.valueOf(sType);
 					//
-					ExemplarProperty exemProp = new ExemplarProperty(id, name,
-							type);
+					DBPFProperties exemProp = new DBPFProperties(id, name, type);
 					modifiableForID.put(exemProp.getId(), exemProp);
 					modifiableForName.put(exemProp.getName().toUpperCase(),
 							exemProp);
 				}
 			} else {
-				Logger.getLogger(DBPFUtil.LOGGER_NAME).log(
+				DBPFUtil.toLog(
+						"DBPFPropertyManager",
 						Level.SEVERE,
 						"Can not analyze Exemplar property: "
 								+ prop.getNodeName());
 			}
 		}
+	}
+
+	/**
+	 * Loads the properties from file 'resources/properties/properties.xml'.<br>
+	 * 
+	 * @return TRUE, if loaded successful; FALSE, otherwise
+	 */
+	public static boolean loadProperties() {
+		return DBPFPropertyManager.loadProperties(PROPERTY_FILE,
+				DBPFPropertyManager.XML_FORMAT_READER);
+	}
+
+	/**
+	 * Loads the properties from a file and set as current properties.<br>
+	 * 
+	 * @param propertiesFile
+	 *            The properties file
+	 * @param xmlFormat
+	 *            The format of the propertiesFile: XML_FORMAT_READER,
+	 *            XML_FORMAT_PIM
+	 * @return TRUE, if loaded successful; FALSE, otherwise
+	 */
+	public static boolean loadProperties(String propertiesFile, int xmlFormat) {
+		// Try internal property file
+		InputStream is = DBPFPropertyManager.class.getResourceAsStream("/"
+				+ propertiesFile);
+
+		// Try external property file
+		if (is == null) {
+			try {
+				is = new FileInputStream(propertiesFile);
+			} catch (FileNotFoundException e) {
+				is = null;
+				// ignore this
+			}
+		}
+
+		// Load from inputstream
+		if (is != null) {
+			return loadProperties(is, xmlFormat);
+		} else {
+			DBPFUtil.toLog("DBPFPropertyManager", Level.SEVERE,
+					"Can not load Exemplar Properties from file: "
+							+ propertiesFile);
+		}
+		return false;
+	}
+
+	/**
+	 * Loads the Properties from an InputStream and set as current properties.<br>
+	 * 
+	 * @param is
+	 *            The inputStream, may be a FileInputStream or from Resource
+	 * @param xmlFormat
+	 *            The format of the propertiesFile: XML_FORMAT_READER,
+	 *            XML_FORMAT_PIM
+	 * @return TRUE, if loaded successful; FALSE, otherwise
+	 */
+	public static boolean loadProperties(InputStream is, int xmlFormat) {
+		currentProperties = new DBPFPropertyManager(is, xmlFormat);
+		return (currentProperties != null);
 	}
 }

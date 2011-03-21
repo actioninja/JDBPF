@@ -1,141 +1,222 @@
 package ssp.dbpf4j.properties;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import ssp.dbpf4j.util.DBPFUtil;
 
 /**
- * Defines some constants for DBPFProperty.<br>
- * 
- * Tries to load the Properties from the file
- * resources/properties/properties.xml, if not found tries to load from inside
- * this JAR-File.
- * 
- * This has been supersede by {@link ssp.dbpf4j.properties.ExemplarProperties}.
- * New implementations should consider using {@code ExemplarProperties} instead,
- * as it provides a type-safe alternative to this class, as well as adds new
- * features not available in this class.
+ * Represents an exemplar property type.<br>
+ * Instances of this represent known exemplar types.
  * 
  * @author Stefan Wertich
- * @version 1.3.0, 22.11.2009
+ * @version 1.6.0, 03.01.2011, last edited 05.01.2011
  */
 public class DBPFProperties {
 
-	/*
-	 * The most used nameValues
-	 */
-	public static final long UNKNOWN = 0x00000000L;
-	public static final long EXEMPLAR_TYPE = 0x00000010L;
-	public static final long EXEMPLAR_NAME = 0x00000020L;
-	public static final long BULLDOZE_COST = 0x099afacdL;
-	public static final long OCCUPANT_SIZE = 0x27812810L;
-	public static final long WEALTH = 0x27812832L;
-	public static final long PURPOSE = 0x27812833L;
-	public static final long DEMAND_SATISFIED = 0x27812840L;
-	public static final long LANDMARK_EFFEKT = 0x2781284fL;
-	public static final long PARK_EFFEKT = 0x27812850L;
-	public static final long POLLUTION_AT_CENTER = 0x27812851L;
-	public static final long POWER_CONSUMED = 0x27812854L;
-	public static final long FLAMMABILITY = 0x29244db5L;
-	public static final long QUERY_EXEMPLAR_GUID = 0x2a499f85L;
-	public static final long MAX_FIRE_STAGE = 0x49beda31L;
-	public static final long PLOP_COST = 0x49cac341L;
-	public static final long CATALOG_CAPACITY = 0x4aa60ebcL;
-	public static final long POLLUTION_RADII = 0x68ee9764L;
-	public static final long LOT_CONFIG_PROPERTY_VERSION = 0x88edc789L;
-	public static final long LOT_CONFIG_PROPERTY_SIZE = 0x88edc790L;
-	public static final long ITEM_NAME = 0x899afbadL;
-	public static final long ITEM_DESCRIPTION = 0x8a2602a9L;
-	public static final long ITEM_ICON = 0x8a2602b8L;
-	public static final long ITEM_ORDER = 0x8a2602b9L;
-	public static final long USER_VISIBLE_NAME_KEY = 0x8a416a99L;
-	public static final long OCCUPANT_GROUPS = 0xaa1dd396L;
-	public static final long ITEM_DESCRIPTION_KEY = 0xca416ab5L;
-	public static final long WATER_CONSUMED = 0xc8ed2d84L;
-	public static final long LOT_RESOURCE_KEY = 0xea260589L;
-	public static final long CONDITIONAL_BUILDING = 0xea3209f8L;
-	public static final long MONTHLY_COST = 0xea54d286L;
-	public static final long ITEM_BUTTON_ID = 0x8a2602bbL;
+	/** A constant representing an unknown exemplar property. */
+	public static final DBPFProperties UNKNOWN = new DBPFProperties();
 
 	/**
-	 * Initialize the properties for first use.
+	 * Some common ExemplarProperties. Only the ID will be set!
 	 */
-	static {
-		String propertiesFile = "resources/properties/properties.xml";
-		InputStream is;
-		// Try external property file
-		try {
-			is = new FileInputStream(propertiesFile);
-		} catch (FileNotFoundException e) {
-			is = null;
-			// ignore this
-		}
+	public static final DBPFProperties EXEMPLAR_NAME = new DBPFProperties(
+			0x00000020L);
+	public static final DBPFProperties EXEMPLAR_TYPE = new DBPFProperties(
+			0x00000010L);
+	public static final DBPFProperties BULLDOZE_COST = new DBPFProperties(
+			0x099afacdL);
+	public static final DBPFProperties OCCUPANT_SIZE = new DBPFProperties(
+			0x27812810L);
+	public static final DBPFProperties WEALTH = new DBPFProperties(0x27812832L);
+	public static final DBPFProperties PURPOSE = new DBPFProperties(0x27812833L);
+	public static final DBPFProperties DEMAND_SATISFIED = new DBPFProperties(
+			0x27812840L);
+	public static final DBPFProperties LANDMARK_EFFEKT = new DBPFProperties(
+			0x2781284fL);
+	public static final DBPFProperties PARK_EFFEKT = new DBPFProperties(
+			0x27812850L);
+	public static final DBPFProperties POLLUTION_AT_CENTER = new DBPFProperties(
+			0x27812851L);
+	public static final DBPFProperties POWER_CONSUMED = new DBPFProperties(
+			0x27812854L);
+	public static final DBPFProperties FLAMMABILITY = new DBPFProperties(
+			0x29244db5L);
+	public static final DBPFProperties QUERY_EXEMPLAR_GUID = new DBPFProperties(
+			0x2a499f85L);
+	public static final DBPFProperties MAX_FIRE_STAGE = new DBPFProperties(
+			0x49beda31L);
+	public static final DBPFProperties PLOP_COST = new DBPFProperties(
+			0x49cac341L);
+	public static final DBPFProperties CATALOG_CAPACITY = new DBPFProperties(
+			0x4aa60ebcL);
+	public static final DBPFProperties POLLUTION_RADII = new DBPFProperties(
+			0x68ee9764L);
+	public static final DBPFProperties LOT_CONFIG_PROPERTY_VERSION = new DBPFProperties(
+			0x88edc789L);
+	public static final DBPFProperties LOT_CONFIG_PROPERTY_SIZE = new DBPFProperties(
+			0x88edc790L);
+	public static final DBPFProperties LOT_CONFIG_PROPERTY_LOT_OBJECT = new DBPFProperties(
+			0x88edc900L);
+	public static final DBPFProperties ITEM_NAME = new DBPFProperties(
+			0x899afbadL);
+	public static final DBPFProperties ITEM_DESCRIPTION = new DBPFProperties(
+			0x8a2602a9L);
+	public static final DBPFProperties ITEM_ICON = new DBPFProperties(
+			0x8a2602b8L);
+	public static final DBPFProperties ITEM_ORDER = new DBPFProperties(
+			0x8a2602b9L);
+	public static final DBPFProperties USER_VISIBLE_NAME_KEY = new DBPFProperties(
+			0x8a416a99L);
+	public static final DBPFProperties OCCUPANT_GROUPS = new DBPFProperties(
+			0xaa1dd396L);
+	public static final DBPFProperties ITEM_DESCRIPTION_KEY = new DBPFProperties(
+			0xca416ab5L);
+	public static final DBPFProperties WATER_CONSUMED = new DBPFProperties(
+			0xc8ed2d84L);
+	public static final DBPFProperties LOT_RESOURCE_KEY = new DBPFProperties(
+			0xea260589L);
+	public static final DBPFProperties CONDITIONAL_BUILDING = new DBPFProperties(
+			0xea3209f8L);
+	public static final DBPFProperties MONTHLY_COST = new DBPFProperties(
+			0xea54d286L);
+	public static final DBPFProperties ITEM_BUTTON_ID = new DBPFProperties(
+			0x8a2602bbL);
 
-		// Try internal property file
-		if (is == null) {
-			is = DBPFProperties.class.getResourceAsStream("/" + propertiesFile);
-		}
+	private final long id;
+	private final String name;
+	private final DBPFPropertyTypes type;
 
-		if (is != null) {
-			ExemplarProperties.loadProperties(is,
-					ExemplarProperties.XML_FORMAT_READER);
+	// public final Map<String, String> attributes;
+
+	/**
+	 * Constructor.<br>
+	 * Creates the UNKNOWN ExemplarProperty
+	 */
+	private DBPFProperties() {
+		this(0, "", DBPFPropertyTypes.STRING);
+		// attributes = Collections.emptyMap();
+	}
+
+	private DBPFProperties(long id) {
+		this(id, "", DBPFPropertyTypes.STRING);
+	}
+
+	/**
+	 * Constructor.<br>
+	 * 
+	 * @param id
+	 *            The id
+	 * @param name
+	 *            The name
+	 * @param type
+	 *            The type
+	 */
+	public DBPFProperties(long id, String name, DBPFPropertyTypes type) {
+		this.id = id;
+		this.name = name;
+		this.type = type;
+	}
+
+	/**
+	 * Constructor.<br>
+	 * Creates an ExemplarProperty from the given Node.
+	 * 
+	 * @param node
+	 *            A node
+	 */
+	// REMARK:
+	// Do not use a specific constructor, the XML file might
+	// be different
+
+	// public ExemplarProperty(Node node) {
+	// xmlElement = (Element) node;
+	// HashMap<String, String> modAttr = new HashMap<String, String>();
+	// attributes = Collections.unmodifiableMap(modAttr);
+	//
+	// NamedNodeMap nodeAttrib = node.getAttributes();
+	// for (int i = 0; i < nodeAttrib.getLength(); i++) {
+	// modAttr.put(nodeAttrib.item(i).getNodeName(), nodeAttrib.item(i)
+	// .getNodeValue());
+	// }
+	//
+	// name = attributes.get("Name");
+	//
+	// String idStr = attributes.get("ID");
+	// if (!idStr.startsWith("0x") || idStr.length() != 10) {
+	// Logger.getLogger(DBPFUtil.LOGGER_NAME).log(
+	// Level.SEVERE,
+	// "NumberFormatException for ID of Exemplar property: "
+	// + idStr);
+	// }
+	// id = Long.parseLong(attributes.get("ID").substring("0x".length()), 16);
+	//
+	// type = PropertyType.valueOf(attributes.get("Type").toUpperCase());
+	// }
+
+	/**
+	 * Creates a DBPFProperty from the given values.<br>
+	 * 
+	 * @param values
+	 *            The values
+	 * @return The DBPFProperty or NULL, if not createable
+	 */
+	public DBPFProperty createProperty(Object values) {
+		// REMARK:
+		// Do not use attributes from the Exemplar Property, they might
+		// be different between various XML files
+
+		// int count;
+		// String defaultVal;
+		// boolean hasCount;
+		// String countStr = attributes.get("Count");
+		// hasCount = (countStr == null);
+		// count = hasCount ? Integer.parseInt(countStr) : 1;
+		// if (values == null) {
+		// defaultVal = attributes.get("Default");
+		// if (type.propertyClass.equals(DBPFLongProperty.class)) {
+		// values = new long[count];
+		// Arrays.fill((long[]) values, Long.decode(defaultVal));
+		// } else if (type.propertyClass.equals(DBPFFloatProperty.class)) {
+		// values = new float[count];
+		// Arrays.fill((float[]) values, Float.parseFloat(defaultVal));
+		// } else if (type.propertyClass.equals(DBPFStringProperty.class)) {
+		// values = defaultVal;
+		// }
+		// }
+
+		DBPFProperty prop = null;
+		if (type.propertyClass.equals(DBPFLongProperty.class)) {
+			prop = new DBPFLongProperty(id, type, (long[]) values);
+		} else if (type.propertyClass.equals(DBPFFloatProperty.class)) {
+			prop = new DBPFFloatProperty(id, type, (float[]) values);
+		} else if (type.propertyClass.equals(DBPFStringProperty.class)) {
+			prop = new DBPFStringProperty(id, type, (String) values);
 		} else {
-			Logger.getLogger(DBPFUtil.LOGGER_NAME).log(
-					Level.SEVERE,
-					"Can not load Exemplar Properties from file: "
-							+ propertiesFile);
+			DBPFUtil.toLog("DBPFProperties", Level.SEVERE,
+					"UnsupportedOperationException: Can not create Property for: "
+							+ values);
 		}
-	}
-
-	/*
-	 * All property values and names in this list
-	 */
-	// public static LinkedHashMap<Long, String> propertyList = new
-	// LinkedHashMap<Long, String>();
-
-	/**
-	 * Returns the first value for the given key.<br>
-	 * 
-	 * @param key
-	 *            The key
-	 * @return The value or NULL, if not found
-	 */
-	public static String getString(long key) {
-		ExemplarProperty prop = ExemplarProperties.getProperties().forID.get(key);
-		if (prop != null) {
-			return prop.getName();
-		}
-		
-		// Can not find the prop and prop name for T format
-//		System.out.println("No Prop found for: "+DBPFUtil.toHex(key, 8));
-		return null;
-		// return propertyList.get(key);
+		return prop;
 	}
 
 	/**
-	 * Returns the first key, which has the given value.<br>
-	 * 
-	 * @param value
-	 *            The value
-	 * @return The key or -1, if not found
+	 * @return the id
 	 */
-	public static long getKey(String value) {
-		return ExemplarProperties.getProperties().forName.get(value).getId();
-		// long key = -1;
-		// if (propertyList.containsValue(value)) {
-		// Iterator<Long> itera = propertyList.keySet().iterator();
-		// while (key == -1 && itera.hasNext()) {
-		// long keyTemp = itera.next();
-		// String elem = propertyList.get(keyTemp);
-		// if (elem.equals(value)) {
-		// key = keyTemp;
-		// }
-		// }
-		// }
-		// return key;
+	public long getId() {
+		return id;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public DBPFPropertyTypes getType() {
+		return type;
 	}
 }

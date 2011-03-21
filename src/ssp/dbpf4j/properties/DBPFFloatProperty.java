@@ -20,7 +20,8 @@ public class DBPFFloatProperty extends AbstractDBPFProperty {
 	 * Constructor.<br>
 	 */
 	public DBPFFloatProperty() {
-		this(DBPFProperties.UNKNOWN, PropertyType.FLOAT32, new float[0]);
+		this(DBPFPropertyManager.getProperties().OTHER.getId(),
+				DBPFPropertyTypes.FLOAT32, new float[0]);
 	}
 
 	/**
@@ -33,7 +34,7 @@ public class DBPFFloatProperty extends AbstractDBPFProperty {
 	 * @param values
 	 *            The values
 	 */
-	public DBPFFloatProperty(long id, PropertyType type, float[] values) {
+	public DBPFFloatProperty(long id, DBPFPropertyTypes type, float[] values) {
 		super(id, 0, type, false, null, 0);
 
 		if (values != null) {
@@ -45,12 +46,12 @@ public class DBPFFloatProperty extends AbstractDBPFProperty {
 		}
 	}
 
-	public DBPFFloatProperty(long id, int count, PropertyType type,
+	public DBPFFloatProperty(long id, int count, DBPFPropertyTypes type,
 			boolean hasCount, short[] rawData, int offset) {
 		super(id, count, type, hasCount, rawData, offset);
 	}
 
-	public DBPFFloatProperty(long id, int count, PropertyType type,
+	public DBPFFloatProperty(long id, int count, DBPFPropertyTypes type,
 			boolean hasCount, String[] data) {
 		super(id, count, type, hasCount, data);
 	}
@@ -75,7 +76,7 @@ public class DBPFFloatProperty extends AbstractDBPFProperty {
 
 	@Override
 	protected void valueToRaw(short[] data, int offset) {
-		PropertyType type = getType();
+		DBPFPropertyTypes type = getType();
 		for (int i = 0; i < getCount(); i++) {
 			DBPFUtil.setFloat32(getFloat(i), data, offset, type.length);
 			offset += type.length;
@@ -121,7 +122,7 @@ public class DBPFFloatProperty extends AbstractDBPFProperty {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
 		sb.append(",");
 		sb.append("Count: " + values.length);

@@ -2,14 +2,16 @@ package ssp.dbpf4j.format;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
 
+import ssp.dbpf4j.util.DBPFConstant;
 import ssp.dbpf4j.util.DBPFUtil;
 
 /**
  * Handle compressed data in DBPF format.<br>
  * 
  * @author Stefan
- * @version 1.2.0, 18.08.2009
+ * @version 1.6.0, 07.01.2011
  * 
  */
 public class DBPFPackager {
@@ -17,7 +19,6 @@ public class DBPFPackager {
 	private long compressedSize = 0;
 	private long decompressedSize = 0;
 	private boolean compressed = false;
-	public static boolean debug = false;
 
 	/**
 	 * Constructor.<br>
@@ -56,7 +57,7 @@ public class DBPFPackager {
 	public static boolean isCompressed(short[] data) {
 		if (data.length > 6) {
 			int signature = (int) DBPFUtil.getUint32(data, 0x04, 2);
-			if (signature == DBPFUtil.MAGICNUMBER_QFS) {
+			if (signature == DBPFConstant.MAGICNUMBER_QFS) {
 				return true;
 			}
 		}
@@ -82,12 +83,11 @@ public class DBPFPackager {
 			long length) {
 		// This shouldn't occur, but to prevent errors
 		if (dest.length < destPos + length) {
-			if (debug) {
-				System.err
-						.println("ATTENTION!"
-								+ "\nBy arrayCopy2 the destination array is not big enough!"
-								+ "\nWill make it bigger and make a System.arraycopy.");
-			}
+			String message = "ATTENTION!"
+					+ "\nBy arrayCopy2 the destination array is not big enough!"
+					+ "\nWill make it bigger and make a System.arraycopy.";
+			DBPFUtil.toLog("DBPFPackager", Level.WARNING, message);
+
 			short[] destExt = new short[(int) (destPos + length)];
 			System.arraycopy(dest, 0, destExt, 0, dest.length);
 			dest = destExt;
@@ -114,12 +114,11 @@ public class DBPFPackager {
 		srcPos = destPos - srcPos;
 		// This shouldn't occur, but to prevent errors
 		if (array.length < destPos + length) {
-			if (debug) {
-				System.err
-						.println("ATTENTION!"
-								+ "\nBy offsetCopy the destination array is not big enough!"
-								+ "\nWill make it bigger and make a System.arraycopy.");
-			}
+			String message = "ATTENTION!"
+					+ "\nBy offsetCopy the destination array is not big enough!"
+					+ "\nWill make it bigger and make a System.arraycopy.";
+			DBPFUtil.toLog("DBPFPackager", Level.WARNING, message);
+
 			short[] arrayNew = new short[(int) (destPos + length)];
 			System.arraycopy(array, 0, arrayNew, 0, array.length);
 			array = arrayNew;
@@ -144,7 +143,7 @@ public class DBPFPackager {
 			int signature = (int) DBPFUtil.getUint32(dData, 0x04, 2);
 			// System.out.println("Signature: " + DBPFUtil.toHex(signature, 4)
 			// + "," + dData.length);
-			if (signature != DBPFUtil.MAGICNUMBER_QFS) {
+			if (signature != DBPFConstant.MAGICNUMBER_QFS) {
 
 				// some Compression Data
 				final int MAX_OFFSET = 0x20000;
@@ -342,7 +341,7 @@ public class DBPFPackager {
 				DBPFUtil.setUint32(writeIndex, cData, 0x00, 4);
 				this.compressedSize = writeIndex;
 				// set the MAGICNUMBER
-				DBPFUtil.setUint32(DBPFUtil.MAGICNUMBER_QFS, cData, 0x04, 2);
+				DBPFUtil.setUint32(DBPFConstant.MAGICNUMBER_QFS, cData, 0x04, 2);
 				// set the decompressed size
 				short[] revData = new short[3];
 				DBPFUtil.setUint32(dData.length, revData, 0x00, 3);
@@ -381,7 +380,7 @@ public class DBPFPackager {
 			// if not compressed
 			decompressedSize = compressedSize;
 
-			if (signature == DBPFUtil.MAGICNUMBER_QFS) {
+			if (signature == DBPFConstant.MAGICNUMBER_QFS) {
 				short a = (short) DBPFUtil.getUint32(cData, 0x06, 1);
 				short b = (short) DBPFUtil.getUint32(cData, 0x07, 1);
 				short c = (short) DBPFUtil.getUint32(cData, 0x08, 1);
@@ -390,11 +389,12 @@ public class DBPFPackager {
 				// There seems sometimes that given compressedSize is
 				// not exactly the read data size.
 				// Don't know why but take real data size for decompress
-				if (debug) {
-					System.err.println("RawData-Size: " + cData.length
-							+ " Found in RawData: " + compressedSize
-							+ " DecompressedSize: " + decompressedSize);
-				}		
+				if (Math.abs(compressedSize - cData.length) > 4) {
+					String message = "RawData-Size: " + cData.length
+							+ " CompressedSize: " + compressedSize
+							+ " DecompressedSize: " + decompressedSize;
+					DBPFUtil.toLog("DBPFPackager", Level.WARNING, message);
+				}
 
 				short[] dData = new short[(int) decompressedSize];
 				int dpos = 0;

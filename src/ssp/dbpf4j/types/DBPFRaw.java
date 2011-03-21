@@ -1,5 +1,7 @@
 package ssp.dbpf4j.types;
 
+import ssp.dbpf4j.tgi.TGIKeys;
+
 /**
  * Defines simple RAW data of DBPF.<br>
  * 
@@ -23,9 +25,9 @@ public class DBPFRaw extends AbstractDBPFType {
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
-		sb.append(", ");
+		sb.append("\n");
 		sb.append("RawData-Size: " + rawData.length);
 		return sb.toString();
 	}
@@ -54,6 +56,6 @@ public class DBPFRaw extends AbstractDBPFType {
 
 	@Override
 	public int getType() {
-		return DBPFTypes.RAW;
+		return TGIKeys.RAW.getFormatID();
 	}
 }

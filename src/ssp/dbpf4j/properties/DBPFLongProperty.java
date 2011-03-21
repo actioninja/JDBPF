@@ -21,7 +21,8 @@ public class DBPFLongProperty extends AbstractDBPFProperty {
 	 * 
 	 */
 	public DBPFLongProperty() {
-		this(DBPFProperties.UNKNOWN, PropertyType.UINT32, new long[0]);
+		this(DBPFPropertyManager.getProperties().OTHER.getId(),
+				DBPFPropertyTypes.UINT32, new long[0]);
 	}
 
 	/**
@@ -34,7 +35,7 @@ public class DBPFLongProperty extends AbstractDBPFProperty {
 	 * @param values
 	 *            The values
 	 */
-	public DBPFLongProperty(long id, PropertyType type, long[] values) {
+	public DBPFLongProperty(long id, DBPFPropertyTypes type, long[] values) {
 		super(id, 0, type, false, null, 0);
 
 		if (values != null) {
@@ -46,12 +47,12 @@ public class DBPFLongProperty extends AbstractDBPFProperty {
 		}
 	}
 
-	public DBPFLongProperty(long id, int count, PropertyType type,
+	public DBPFLongProperty(long id, int count, DBPFPropertyTypes type,
 			boolean hasCount, short[] rawData, int offset) {
 		super(id, count, type, hasCount, rawData, offset);
 	}
 
-	public DBPFLongProperty(long id, int count, PropertyType type,
+	public DBPFLongProperty(long id, int count, DBPFPropertyTypes type,
 			boolean hasCount, String[] data) {
 		super(id, count, type, hasCount, data);
 	}
@@ -73,7 +74,7 @@ public class DBPFLongProperty extends AbstractDBPFProperty {
 			long value = 0x00;
 			if (data[i].length() > 0) {
 				String val = data[i].trim();
-				if (type == PropertyType.BOOL) {
+				if (type == DBPFPropertyTypes.BOOL) {
 					if (val.toLowerCase().equals("true") ||
 					// wrong implemented in older DBPF4J versions:
 							val.equals("0x01")) {
@@ -83,7 +84,7 @@ public class DBPFLongProperty extends AbstractDBPFProperty {
 					if (!val.contains("0x")) {
 						val = "0x" + val;
 					}
-					boolean signed = (type == PropertyType.SINT32 || type == PropertyType.SINT64);
+					boolean signed = (type == DBPFPropertyTypes.SINT32 || type == DBPFPropertyTypes.SINT64);
 					value = DBPFUtil.toValue(val, signed);
 				}
 			}
@@ -93,7 +94,7 @@ public class DBPFLongProperty extends AbstractDBPFProperty {
 
 	@Override
 	protected void valueToRaw(short[] data, int offset) {
-		PropertyType type = getType();
+		DBPFPropertyTypes type = getType();
 		for (int i = 0; i < getCount(); i++) {
 			DBPFUtil.setValue(type, getLong(i), data, offset, type.length);
 			offset += type.length;
@@ -104,7 +105,7 @@ public class DBPFLongProperty extends AbstractDBPFProperty {
 	protected void valueToText(Appendable destination) throws IOException {
 		int last = getCount() - 1;
 		for (int i = 0; i < getCount(); i++) {
-			if (type == PropertyType.BOOL) {
+			if (type == DBPFPropertyTypes.BOOL) {
 				destination.append(DBPFUtil.toBooleanString(getLong(i)));
 			} else {
 				destination.append("0x");
@@ -132,7 +133,7 @@ public class DBPFLongProperty extends AbstractDBPFProperty {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
 		sb.append(",");
 		sb.append("RepSize: " + values.length);

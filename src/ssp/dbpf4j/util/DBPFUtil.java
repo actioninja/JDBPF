@@ -3,18 +3,22 @@ package ssp.dbpf4j.util;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Locale;
-import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
-import ssp.dbpf4j.properties.PropertyType;
+import ssp.dbpf4j.properties.DBPFPropertyTypes;
 
 /**
- * Various tools for DBPF.<br>
+ * Basic tools for operations on DBPF.<br>
  * 
  * @author Stefan Wertich
- * @version 1.5.3, 13.10.2010
+ * @version 1.6.0, 08.01.2011
  * 
  */
 public class DBPFUtil {
@@ -26,27 +30,51 @@ public class DBPFUtil {
 
 	/**
 	 * Magic number for DBPF
+	 * 
+	 * @deprecated Moved to DBPFConstant
 	 */
 	public static final String MAGICNUMBER_DBPF = "DBPF";
 
 	/**
 	 * Magic number for Exemplar files
+	 * 
+	 * @deprecated Moved to DBPFConstant
 	 */
 	public static final String MAGICNUMBER_EQZ = "EQZ";
 
 	/**
+	 * Magic number for Cohort files
+	 * 
+	 * @deprecated Moved to DBPFConstant
+	 */
+	public static final String MAGICNUMBER_CQZ = "CQZ";
+
+	/**
 	 * Magic number for Compressed data
+	 * 
+	 * @deprecated Moved to DBPFConstant
 	 */
 	public static final int MAGICNUMBER_QFS = 0xFB10;
 
 	/**
+	 * The size of the header in a DBPF file
+	 * 
+	 * @deprecated Moved to DBPFConstant
+	 */
+	public static final int SIZE_DBPF_HEADER = 0x60; // =96dec
+
+	/**
 	 * Magic number for the B-Format of an exemplar
+	 * 
+	 * @deprecated Moved to DBPFConstant
 	 * 
 	 */
 	public static final short FORMAT_BINARY = 0x42;
 
 	/**
 	 * Magic number for the T-Format of an exemplar
+	 * 
+	 * @deprecated Moved to DBPFConstant
 	 * 
 	 */
 	public static final short FORMAT_TEXT = 0x54;
@@ -62,6 +90,53 @@ public class DBPFUtil {
 		FLOAT_FORMAT = new DecimalFormat("#0.#");
 		FLOAT_FORMAT.setMaximumFractionDigits(6);
 		FLOAT_FORMAT.setDecimalFormatSymbols(dfs);
+
+		Logger.getLogger(DBPFUtil.LOGGER_NAME).setUseParentHandlers(false);
+	}
+
+	/**
+	 * This defines the string for next line
+	 */
+	public static final String CRLF = "\r\n"; // 0x0D 0x0A
+
+	/**
+	 * Logs the message to the standard DBPF logger.<br>
+	 * 
+	 * @param level
+	 *            The level
+	 * @param message
+	 *            The message
+	 */
+	public static void toLog(String source, Level level, String message) {
+		LogRecord record = new LogRecord(level, message);
+		record.setSourceClassName(source);
+		Logger.getLogger(DBPFUtil.LOGGER_NAME).log(record);
+	}
+
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	// PRINT
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	/**
+	 * Prints the data in a special HEX format with 16 hex values.<br>
+	 * 
+	 * @param data
+	 *            The data
+	 */
+	public static void printData(short[] data) {
+		System.out.println("## ## ## ## ## ## ## ## | ## ## ## ## ## ## ## ##");
+		int count = 0;
+		for (Short s : data) {
+			System.out.print(DBPFUtil.toHex(s, 2) + " ");
+			count++;
+			if (count == 8) {
+				System.out.print("| ");
+			} else if (count == 16) {
+				count = 0;
+				System.out.println("");
+			}
+		}
+		System.out.println("");
 	}
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -78,19 +153,15 @@ public class DBPFUtil {
 	public static String getExemplarFormat(short format) {
 		String ret = "Unknown";
 		switch (format) {
-		case FORMAT_BINARY:
+		case DBPFConstant.FORMAT_BINARY:
 			ret = "B-Format (0x42)";
 			break;
-		case FORMAT_TEXT:
+		case DBPFConstant.FORMAT_TEXT:
 			ret = "T-Format (0x54)";
 			break;
 		}
 		return ret;
 	}
-
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	// CONVERT, FORMAT, DATE
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	/**
 	 * Converts a hex value given by a long to a float value.<br>
@@ -133,7 +204,14 @@ public class DBPFUtil {
 	 * @return The hex string
 	 */
 	public static String toHex(long value, int length) {
-		return new Formatter().format("%0" + length + "x", value).toString();
+		String ret = new Formatter().format("%0" + length + "x", value)
+				.toString();
+		// for negative values the formatter doesn't fit to length,
+		// so we cut the string to the wished length.
+		if (value < 0) {
+			ret = ret.substring(ret.length() - length);
+		}
+		return ret;
 	}
 
 	/**
@@ -209,29 +287,6 @@ public class DBPFUtil {
 	}
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	// TGI
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-	/**
-	 * Check if the given TGI is same as another TGI.<br>
-	 * 
-	 * If any of the ids is -1, it will be ignored, means this id does not
-	 * matter anything.<br>
-	 * If one of the array has NOT the length 3, FALSE will be returned.
-	 * 
-	 * @param tgiEntry
-	 *            The TGI of an entry
-	 * @param tgiCheck
-	 *            The TGI to check with
-	 * @return TRUE, if the both are same; FALSE, otherwise
-	 * 
-	 * @deprecated Replaced by DBPFUtil2.isTGI()
-	 */
-	public static boolean isTGI(long[] tgiEntry, long[] tgiCheck) {
-		return DBPFUtil2.isTGI(tgiEntry, tgiCheck);
-	}
-
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// ARRAY: convert, read, write
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -303,7 +358,7 @@ public class DBPFUtil {
 		// create the hex string from the value
 		String s = Long.toHexString(value);
 		// fill with necessary zeros to fit into array
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < 2 * length - s.length(); i++) {
 			sb.append('0');
 		}
@@ -367,7 +422,7 @@ public class DBPFUtil {
 		if (signed && (data[start + length - 1] & 0xF0) == 0xF0) {
 
 			// create an hex string from the shorts
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < length; i++) {
 				sb.append(toHex(data[start + length - 1 - i], 2));
 			}
@@ -439,7 +494,7 @@ public class DBPFUtil {
 			result = -1;
 		} else {
 			// get signifikant bits
-			String value = hexString.substring(i);
+			String value = "0" + hexString.substring(i);
 			long val = Long.parseLong(value, 16);
 
 			// create specific maximum from length and signifikant bits
@@ -467,9 +522,10 @@ public class DBPFUtil {
 	 * 
 	 * @return A long value
 	 */
-	public static long getValue(PropertyType type, short[] data, int start,
-			int length) {
-		if (type == PropertyType.SINT32 || type == PropertyType.SINT64) {
+	public static long getValue(DBPFPropertyTypes type, short[] data,
+			int start, int length) {
+		if (type == DBPFPropertyTypes.SINT32
+				|| type == DBPFPropertyTypes.SINT64) {
 			return getSint32(data, start, length);
 		}
 		return getUint32(data, start, length);
@@ -490,9 +546,10 @@ public class DBPFUtil {
 	 * @param length
 	 *            The length
 	 */
-	public static void setValue(PropertyType type, long value, short[] data,
-			int start, int length) {
-		if (type == PropertyType.SINT32 || type == PropertyType.SINT64) {
+	public static void setValue(DBPFPropertyTypes type, long value,
+			short[] data, int start, int length) {
+		if (type == DBPFPropertyTypes.SINT32
+				|| type == DBPFPropertyTypes.SINT64) {
 			setSint32(value, data, start, length);
 		}
 		setUint32(value, data, start, length);
@@ -531,6 +588,62 @@ public class DBPFUtil {
 	 */
 	public static void setUint32(long value, short[] data, int start, int length) {
 		toArray(value, data, start, length);
+	}
+
+	/**
+	 * Reads an INT32 till length reached.<br>
+	 * 
+	 * This is the method with byte shifting, e.g. for 4 bytes:<br>
+	 * value = value | (((data[start] &0xFF) << 0));<br>
+	 * value = value | (((data[start+1] &0xFF) << 8));<br>
+	 * value = value | (((data[start+2] &0xFF) << 16));<br>
+	 * value = value | (((data[start+3] &0xFF) << 24));<br>
+	 * 
+	 * @param data
+	 *            The data
+	 * @param start
+	 *            The start offset
+	 * @param length
+	 *            The length
+	 * 
+	 * @return A long value to store INT32
+	 */
+
+	public static long getInt32(short[] data, int start, int length) {
+		long value = 0;
+		for (int i = 0; i < length; i++) {
+			value = value | ((data[start + i] & 0xFF) << i * 8);
+		}
+		return value;
+	}
+
+	/**
+	 * Writes an INT32 till length reached.<br>
+	 * 
+	 * This is the method with byte shifting, e.g. for 4 bytes:<br>
+	 * data2[start + j] = (short) (((value << 24) >> 24) & 0xFF);<br>
+	 * data2[start + j + 1] = (short) (((value << 16) >> 24) & 0xFF);<br>
+	 * data2[start + j + 2] = (short) (((value << 8) >> 24) & 0xFF);<br>
+	 * data2[start + j + 3] = (short) (((value << 0) >> 24) & 0xFF);<br>
+	 * 
+	 * @param value
+	 *            The value
+	 * @param data
+	 *            The data
+	 * @param start
+	 *            The start offset
+	 * @param length
+	 *            The length
+	 * 
+	 */
+	public static void setInt32(long value, short[] data, int start,
+			int length) {
+		int length2 = length - 1;
+		int maxShift = length2 * 8;
+		for (int j = 0; j < length; j++) {
+			data[start + j] = (short) (((value << (length2 - j) * 8) >> maxShift) & 0xFF);
+		}
+
 	}
 
 	/**
@@ -615,7 +728,7 @@ public class DBPFUtil {
 	 * @return A string
 	 */
 	public static String getChars(short[] data, int start, int length) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			sb.append((char) data[start + i]);
 		}
@@ -650,7 +763,7 @@ public class DBPFUtil {
 	 * @return A string
 	 */
 	public static String getUnicode(short[] data, int start, int length) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			int val = data[start + 2 * i] + 256 * data[start + 2 * i + 1];
 			sb.append((char) val);
@@ -690,16 +803,16 @@ public class DBPFUtil {
 	 *            The start index
 	 * @return The list with strings
 	 */
-	public static Vector<String> getLines(short[] data, int start) {
-		Vector<String> readData = new Vector<String>();
-		StringBuffer sb = new StringBuffer();
+	public static List<String> getLines(short[] data, int start) {
+		ArrayList<String> readData = new ArrayList<String>();
+		StringBuilder sb = new StringBuilder();
 		int i = start;
 		while (i < data.length) {
 			short dat = data[i];
 			if (dat == 0x0D || dat == 0x0A) {
 				if (sb.length() != 0) {
-					readData.addElement(sb.toString());
-					sb = new StringBuffer();
+					readData.add(sb.toString());
+					sb = new StringBuilder();
 				}
 			} else {
 				sb.append((char) dat);
@@ -708,8 +821,9 @@ public class DBPFUtil {
 		}
 		// check if last element without CRLF and add it
 		if (sb.length() != 0) {
-			readData.addElement(sb.toString());
+			readData.add(sb.toString());
 		}
 		return readData;
 	}
+
 }

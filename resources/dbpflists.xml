@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<exemplars version="1.3.0">
+	<occupantGroups>
+		<group name="Building">
+			<property num="0x1000" name="Building: Residential (Grow)"></property>
+			<property num="0x1001" name="Building: Commercial (Grow)"></property>
+			<property num="0x1002" name="Building: Industrial (Grow)"></property>
+			<property num="0x1003" name="Building: Transportation"></property>
+			<property num="0x1004" name="Building: Utility"></property>
+			<property num="0x1005" name="Building: Civic"></property>
+			<property num="0x1006" name="Building: Park (Menu)"></property>
+			<property num="0x1009" name="Building: Scripting Use"></property>
+			<property num="0x100a" name="Building: Fauna Generate"></property>
+		</group>
+		<!--
+			Commercial MySim
+			-->
+		<group name="Transportation">
+			<property num="0x1300" name="Transportation: Rail (Menu)"></property>
+			<property num="0x1301" name="Transportation: Bus"></property>
+			<property num="0x1302" name="Transportation: Subway"></property>
+			<property num="0x1303" name="Transportation: El. Train"></property>
+			<property num="0x1304" name="Transportation: Ferry"></property>
+			<property num="0x1305" name="Transportation: Passenger Rail"></property>
+			<property num="0x1306" name="Transportation: Freight Rail"></property>
+			<property num="0x1307" name="Transportation: Monorail"></property>
+			<property num="0x1308" name="Transportation: Car Ferry"></property>
+			<property num="0x1309" name="Transportation: Passenger Ferry"></property>			
+			<property num="0x130a" name="Transportation: Misc. Transit (Menu)"></property>
+			<property num="0x130b" name="Transportation: Toll Booth"></property>
+		</group>
+		<group name="Utilities">
+			<property num="0x1400" name="Utilities: Power (Menu)"></property>
+			<property num="0x1401" name="Utilities: Water (Menu)"></property>
+			<property num="0x1402" name="Utilities: Landfill-Sanitation (Menu)"></property>
+			<property num="0x1403" name="Utilities: Nuclear"></property>
+			<property num="0x1404" name="Utilities: Recycle"></property>
+			<property num="0x1405" name="Utilities: Toxic Dump"></property>
+			<property num="0x1406" name="Utilities: Landfill-Zone"></property>
+		</group>
+		<group name="Civic Buildings">
+			<property num="0x1500" name="Civic: Police (Menu)"></property>
+			<property num="0x1501" name="Civic: Jail"></property>
+			<property num="0x1502" name="Civic: Fire (Menu)"></property>
+			<property num="0x1503" name="Civic: School (Menu)"></property>
+			<property num="0x1504" name="Civic: College"></property>
+			<property num="0x1505" name="Civic: Library"></property>
+			<property num="0x1506" name="Civic: Museum"></property>
+			<property num="0x1507" name="Civic: Health (Menu)"></property>
+			<property num="0x1508" name="Civic: Airport (Menu)"></property>			
+			<property num="0x1509" name="Civic: Seaport"></property>
+			<property num="0x150a" name="Civic: Landmark (Menu)"></property>
+			<property num="0x150b" name="Civic: Reward (Menu)"></property>
+			<property num="0x150c" name="Civic: Landmark Queue"></property>
+			<property num="0x150d" name="Civic: Police Big"></property>
+			<property num="0x150e" name="Civic: Police Small"></property>
+			<property num="0x150f" name="Civic: School K6"></property>
+			<property num="0x1510" name="Civic: School HS"></property>
+			<property num="0x1511" name="Civic: Courthouse"></property>
+			<property num="0x1512" name="Civic: Clinic"></property>
+			<property num="0x1513" name="Civic: Hospital"></property>
+			<property num="0x1514" name="Civic: School Private"></property>
+			<property num="0x1515" name="Civic: DeLuxe Police Station"></property>
+			<property num="0x1516" name="Civic: Police Kiosk"></property>
+			<property num="0x1517" name="Civic: Landing Strip"></property>
+			<property num="0x1518" name="Civic: DeLuxe Fire Station"></property>
+			<property num="0x1519" name="Civic: Water Transit (Menu)"></property>
+			<property num="0x151a" name="Civic: Large Health"></property>
+			<property num="0x151b" name="Civic: School Other"></property>
+			<property num="0x151c" name="Civic: Health Other"></property>
+		</group>
+		<group name="Automata Spawners">
+			<property num="0x1700" name="Spawn: Cemetary"></property>
+			<property num="0x1701" name="Spawn: Pet Cemetary"></property>
+			<property num="0x1702" name="Spawn: Zoo"></property>
+			
+			<property num="0x1900" name="Spawn: VIP"></property>
+			<property num="0x1901" name="Spawn: Tourist"></property>
+			<property num="0x1902" name="Spawn: Country Club"></property>
+			<property num="0x1903" name="Spawn: Taxi Maker"></property>
+			<property num="0x1904" name="Spawn: Ambulance Maker"></property>
+			<property num="0x1905" name="Spawn: DMV"></property>
+			<property num="0x1906" name="Spawn: Stadium"></property>
+			<property num="0x1907" name="Spawn: Worship"></property>
+			<property num="0x1908" name="Spawn: Night Club"></property>
+			<property num="0x1909" name="Spawn: Opera House"></property>
+			<property num="0x1910" name="Spawn: TV Station"></property>
+			<property num="0x1911" name="Spawn: TV Magnet"></property>
+			<property num="0x1912" name="Spawn: Farmland"></property>
+			<property num="0x1913" name="Spawn: Biz Lawyer Attack"></property>
+			<property num="0x1914" name="Spawn: Army Base"></property>
+			<property num="0x1915" name="Spawn: Missile Range"></property>
+			<property num="0x1916" name="Spawn: Army Tank"></property>
+			<property num="0x1917" name="Spawn: Ape Escape"></property>
+			<property num="0x1918" name="Spawn: Llamas"></property>
+			<property num="0x1919" name="Spawn: Dog Magnet"></property>
+			<property num="0x1920" name="Spawn: YIMBY"></property>
+			<property num="0x1921" name="Spawn: Convention Crowd"></property>
+			<property num="0x1922" name="Spawn: Kid Crowd"></property>
+			<property num="0x1923" name="Spawn: Sim Crowd Day Small"></property>
+			<property num="0x1924" name="Spawn: Sim Crows Day Large"></property>
+			<property num="0x1925" name="Spawn: State Fair"></property>
+			<property num="0x1926" name="Spawn: Bus Stop"></property>
+			<property num="0x1927" name="Spawn: Sim Crowd Stand"></property>
+			<property num="0x1928" name="Spawn: Strikers-NIMBY"></property>
+			<property num="0x1929" name="Spawn: Crowd Biz"></property>
+			<property num="0x1930" name="Spawn: Crowd White Coat"></property>
+			<property num="0x1931" name="Spawn: Army Ped"></property>
+			<property num="0x1932" name="Spawn: Army Jumping Jacks"></property>
+			<property num="0x1933" name="Spawn: Zombie Building"></property>
+			<property num="0x1934" name="Spawn: Mower Building"></property>
+			<property num="0x1935" name="Spawn: Landmark Ogle"></property>
+			<property num="0x1936" name="Spawn: Burner Dude Maker"></property>
+			<property num="0x1937" name="Spawn: Crowd Stand Return"></property>
+			<property num="0x1938" name="Spawn: Mayor House"></property>
+			<property num="0x1939" name="Spawn: Icecream Spawner"></property>
+			<property num="0x1940" name="Spawn: Casino"></property>
+			<property num="0x1941" name="Spawn: Marina"></property>
+			<property num="0x1942" name="Spawn: Police Car Maker"></property>
+		</group>
+		<group name="Strikable Building">
+			<property num="0x1a00" name="Strikable Fire"></property>
+			<property num="0x1a01" name="Strikable Police"></property>
+			<property num="0x1a02" name="Strikable Health"></property>
+			<property num="0x1a03" name="Strikable Education"></property>
+			<property num="0x1a04" name="Strikable Transit"></property>
+		</group>
+		<group name="Style">
+			<property num="0x2000" name="Style: Chicago"></property>
+			<property num="0x2001" name="Style: New York"></property>
+			<property num="0x2002" name="Style: Houston"></property>
+			<property num="0x2003" name="Style: Euro"></property>
+		</group>
+		<group name="Industrial Subtypes">
+			<property num="0x3000" name="Industry: Anchor"></property>
+			<property num="0x3001" name="Industry: Mechanical"></property>
+			<property num="0x3002" name="Industry: Out"></property>
+		</group>
+		<group name="RCI Occupant Types for MySim Balloons">
+			<property num="0x11010" name="R$"></property>
+			<property num="0x11020" name="R$$"></property>
+			<property num="0x11030" name="R$$$"></property>
+			<property num="0x13110" name="CS$"></property>
+			<property num="0x13120" name="CS$$"></property>
+			<property num="0x13130" name="CS$$$"></property>
+			<property num="0x13320" name="CO$$"></property>
+			<property num="0x13330" name="CO$$$"></property>
+			<property num="0x14100" name="IR"></property>
+			<property num="0x14200" name="ID"></property>
+			<property num="0x14300" name="IM"></property>
+			<property num="0x14400" name="IHT"></property>
+		</group>
+		<!--
+			UDI MySim Dispatch
+		-->
+	</occupantGroups>
+	<occupantTypes>
+		<group name="Occupant Types">
+			<property num="0x1010" name="R$"></property>
+			<property num="0x1020" name="R$$"></property>
+			<property num="0x1030" name="R$$$"></property>
+			<property num="0x3110" name="CS$"></property>
+			<property num="0x3120" name="CS$$"></property>
+			<property num="0x3130" name="CS$$$"></property>
+			<property num="0x3320" name="CO$$"></property>
+			<property num="0x3330" name="CO$$$"></property>
+			<property num="0x4100" name="IR"></property>
+			<property num="0x4200" name="ID"></property>
+			<property num="0x4300" name="IM"></property>
+			<property num="0x4400" name="IHT"></property>
+		</group>
+	</occupantTypes>
+	<purposes>
+		<group name="Purpose">
+			<property num="0x1" name="R"></property>
+			<property num="0x2" name="CS"></property>
+			<property num="0x3" name="CO"></property>
+			<property num="0x5" name="IR"></property>
+			<property num="0x6" name="ID"></property>
+			<property num="0x7" name="IM"></property>
+			<property num="0x8" name="IHT"></property>
+		</group>
+	</purposes>
+	<lotconfigdata>
+		<group name="LotConfigPropertyLotObjectData">
+			<property num="0x00000000" name="Building"></property>
+			<property num="0x00000001" name="Prop"></property>
+			<property num="0x00000002" name="Texture"></property>
+			<property num="0x00000007" name="Transit-Enable"></property>
+		</group>
+	</lotconfigdata>
+	<lotconfigzones>
+		<group name="LotConfigPropertyZoneTypes">
+			<property num="0x01" name="Low Res"></property>
+			<property num="0x02" name="Medium Res"></property>
+			<property num="0x03" name="High Res"></property>
+			<property num="0x05" name="Medium Com"></property>
+			<property num="0x06" name="High Com"></property>
+			<property num="0x07" name="Farming"></property>
+			<property num="0x08" name="Medium Ind"></property>
+			<property num="0x09" name="High Ind"></property>
+		</group>
+	</lotconfigzones>
+</exemplars>

@@ -16,7 +16,7 @@ import ssp.dbpf4j.util.DBPFUtil;
  * @version 1.6.0, 28.12.2010
  * 
  */
-public class DBPFExemplar extends AbstractDBPFType {
+public class DBPFCohort extends AbstractDBPFType {
 
 	private TGIKey tgiCohort;
 
@@ -28,22 +28,24 @@ public class DBPFExemplar extends AbstractDBPFType {
 	 * Constructor.<br>
 	 * 
 	 */
-	public DBPFExemplar() {
+	public DBPFCohort() {
 		tgiCohort = new TGIKey();
 		propertyList = new DBPFProperty[0];
 	}
-	
+
 	/**
 	 * Constructor.<br>
-	 * @param cohort The cohort
+	 * 
+	 * @param exemplar
+	 *            The exemplar
 	 */
-	public DBPFExemplar(DBPFCohort cohort) {
-		setCompressed(cohort.isCompressed());
-		setDecompressedSize(cohort.getDecompressedSize());
-		setTGIKey(cohort.getTGIKey());
-		setTGICohort(cohort.getTGICohort());
-		setFormat(cohort.getFormat());
-		setPropertyList(cohort.getPropertyList());
+	public DBPFCohort(DBPFExemplar exemplar) {
+		setCompressed(exemplar.isCompressed());
+		setDecompressedSize(exemplar.getDecompressedSize());
+		setTGIKey(exemplar.getTGIKey());
+		setTGICohort(exemplar.getTGICohort());
+		setFormat(exemplar.getFormat());
+		setPropertyList(exemplar.getPropertyList());
 	}
 
 	@Override
@@ -69,7 +71,6 @@ public class DBPFExemplar extends AbstractDBPFType {
 		return sb.toString();
 	}
 
-
 	/**
 	 * @return the propertyList
 	 */
@@ -83,7 +84,7 @@ public class DBPFExemplar extends AbstractDBPFType {
 	 */
 	public void setPropertyList(DBPFProperty[] propertyList) {
 		this.propertyList = propertyList;
-		setDecompressedSize(DBPFCoder.calcExemplarDataLength(this));
+		setDecompressedSize(DBPFCoder.calcCohortDataLength(this));
 	}
 
 	/**
@@ -106,7 +107,7 @@ public class DBPFExemplar extends AbstractDBPFType {
 
 	@Override
 	public int getType() {
-		return TGIKeys.EXEMPLAR.getFormatID();
+		return TGIKeys.COHORT.getFormatID();
 	}
 
 	/**

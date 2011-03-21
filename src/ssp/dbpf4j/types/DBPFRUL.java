@@ -1,5 +1,7 @@
 package ssp.dbpf4j.types;
 
+import ssp.dbpf4j.tgi.TGIKeys;
+
 /**
  * Defines a RUL of DBPF.<br>
  * 
@@ -23,16 +25,10 @@ public class DBPFRUL extends AbstractDBPFType {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
-		sb.append(", ");
+		sb.append("\n");
 		sb.append("Data-Size: " + data.length);
-		return sb.toString();
-	}
-
-	@Override
-	public String toDetailString() {
-		StringBuffer sb = new StringBuffer(toString());
 		if (data.length > 0) {
 			sb.append("\n");
 			sb.append(data);
@@ -63,6 +59,6 @@ public class DBPFRUL extends AbstractDBPFType {
 
 	@Override
 	public int getType() {
-		return DBPFTypes.RUL;
+		return TGIKeys.RUL.getFormatID();
 	}
 }

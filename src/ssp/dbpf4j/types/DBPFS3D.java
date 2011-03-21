@@ -1,5 +1,7 @@
 package ssp.dbpf4j.types;
 
+import ssp.dbpf4j.tgi.TGIKeys;
+
 /**
  * Defines a S3D of DBPF.<br>
  * 
@@ -17,9 +19,9 @@ public class DBPFS3D extends AbstractDBPFType {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
-		sb.append(", ");
+		sb.append("\n");
 		sb.append("Data-Size: " + rawData.length);
 		return sb.toString();
 	}
@@ -48,6 +50,6 @@ public class DBPFS3D extends AbstractDBPFType {
 
 	@Override
 	public int getType() {
-		return DBPFTypes.RAW;
+		return TGIKeys.RAW.getFormatID();
 	}
 }

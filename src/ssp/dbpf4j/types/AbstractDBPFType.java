@@ -1,6 +1,6 @@
 package ssp.dbpf4j.types;
 
-import ssp.dbpf4j.util.DBPFUtil;
+import ssp.dbpf4j.tgi.TGIKey;
 
 /**
  * The abstract DBPFType.<br>
@@ -8,12 +8,12 @@ import ssp.dbpf4j.util.DBPFUtil;
  * The TGI will be initialized with {0L, 0L, 0L}.
  * 
  * @author Stefan Wertich
- * @version 1.5.0, 24.08.2010
+ * @version 1.6.0, 29.12.2010
  * 
  */
 public abstract class AbstractDBPFType implements DBPFType {
 
-	protected long[] tgi;
+	protected TGIKey tgiKey;
 	protected boolean compressed;
 	protected long decompressedSize;
 
@@ -21,55 +21,49 @@ public abstract class AbstractDBPFType implements DBPFType {
 	 * Constructor.<br>
 	 */
 	public AbstractDBPFType() {
-		tgi = new long[] { 0x0L, 0x0L, 0x0L };
+		tgiKey = new TGIKey();
 	}
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("TGI: ");
-		sb.append(DBPFUtil.toHex(tgi[0], 8));
-		sb.append(",");
-		sb.append(DBPFUtil.toHex(tgi[1], 8));
-		sb.append(",");
-		sb.append(DBPFUtil.toHex(tgi[2], 8));
+		sb.append(tgiKey.toString());
 		sb.append(",");
 		sb.append("Compressed: ");
 		sb.append(compressed);
+		sb.append(",");
+		sb.append("Decompressed Size: ");
+		sb.append(decompressedSize);
 		return sb.toString();
 	}
 
 	@Override
-	public String toDetailString() {
-		return toString();
+	public long getTID() {
+		return getTGIKey().getTID();
+	}
+
+	@Override
+	public long getGID() {
+		return getTGIKey().getGID();
+	}
+
+	@Override
+	public long getIID() {
+		return getTGIKey().getIID();
 	}
 
 	@Override
 	public abstract int getType();
 
 	@Override
-	public long[] getTGI() {
-		return tgi;
+	public TGIKey getTGIKey() {
+		return tgiKey;
 	}
 
 	@Override
-	public void setTGI(long[] tgi) {
-		this.tgi = tgi;
-	}
-	
-	@Override
-	public long getTID() {
-		return tgi[0];
-	}
-
-	@Override
-	public long getGID() {
-		return tgi[1];
-	}
-
-	@Override
-	public long getIID() {
-		return tgi[2];
+	public void setTGIKey(TGIKey tgiKey) {
+		this.tgiKey = tgiKey;
 	}
 
 	@Override

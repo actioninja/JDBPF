@@ -1,5 +1,7 @@
 package ssp.dbpf4j.types;
 
+import ssp.dbpf4j.tgi.TGIKeys;
+
 /**
  * Defines a directory of the DBPF.<br>
  * 
@@ -19,15 +21,14 @@ public class DBPFDirectory extends AbstractDBPFType {
 	 * Constructor.<br>
 	 */
 	public DBPFDirectory() {
-		tgi = new long[0];
 		rawData = new short[0];
 	}
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
-		sb.append(", ");
+		sb.append("\n");
 		sb.append("RawData-Size: " + rawData.length);
 		return sb.toString();
 	}
@@ -56,7 +57,7 @@ public class DBPFDirectory extends AbstractDBPFType {
 
 	@Override
 	public int getType() {
-		return DBPFTypes.DIRECTORY;
+		return TGIKeys.DIRECTORY.getFormatID();
 	}
 
 }

@@ -1,6 +1,8 @@
 package ssp.dbpf4j;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import ssp.dbpf4j.entries.DBPFEntry;
@@ -10,20 +12,10 @@ import ssp.dbpf4j.util.DBPFUtil;
  * Defines a DBPF file.<br>
  * 
  * @author Stefan Wertich
- * @version 0.9.1.26, 26.01.2009
+ * @version 1.6.0, 07.01.2011
  * 
  */
 public class DBPFFile {
-
-	/*
-	 * Header size of the DBPF file
-	 */
-	public static final long HEADER_SIZE = 0x60; // =96dec
-
-	/*
-	 * Filename
-	 */
-	private File filename;
 
 	private long majorVersion = 0;
 	private long minorVersion = 0;
@@ -33,18 +25,19 @@ public class DBPFFile {
 	private long indexOffsetLocation = 0;
 	private long indexSize = 0;
 
-	private Vector<DBPFEntry> entryList;
+	private File filename;
+	private List<DBPFEntry> entryList;
 
 	/**
 	 * Constructor.<br>
 	 */
 	public DBPFFile() {
 		this.filename = new File("blank.dat");
-		this.entryList = new Vector<DBPFEntry>(10);
+		this.entryList = new ArrayList<DBPFEntry>(10);
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("File: " + filename);
 		sb.append("\n");
 		sb.append("Version: " + majorVersion + "." + minorVersion);
@@ -59,11 +52,6 @@ public class DBPFFile {
 		sb.append(", ");
 		sb.append("IndexSize: " + indexSize);
 		sb.append("\n");
-		return sb.toString();
-	}
-
-	public String toDetailString() {
-		StringBuffer sb = new StringBuffer(toString());
 		for (DBPFEntry element : entryList) {
 			sb.append(element.toString());
 			sb.append("\n");
@@ -89,7 +77,7 @@ public class DBPFFile {
 	/**
 	 * @return the fileList
 	 */
-	public Vector<DBPFEntry> getEntryList() {
+	public List<DBPFEntry> getEntryList() {
 		return entryList;
 	}
 
@@ -99,6 +87,16 @@ public class DBPFFile {
 	 */
 	public void setEntryList(Vector<DBPFEntry> fileList) {
 		this.entryList = fileList;
+	}
+
+	/**
+	 * Adds a DBPFEntry to the entryList.<br>
+	 * 
+	 * @param entry
+	 *            The entry
+	 */
+	public void addEntry(DBPFEntry entry) {
+		entryList.add(entry);
 	}
 
 	/**

@@ -2,13 +2,14 @@ package ssp.dbpf4j.entries;
 
 import java.io.File;
 
+import ssp.dbpf4j.tgi.TGIKey;
 import ssp.dbpf4j.util.DBPFUtil;
 
 /**
  * Defines an element of a DBPF file.<br>
  * 
  * @author Stefan Wertich
- * @version 1.2.0, 20.08.2009
+ * @version 1.6.0, 29.12.2010
  * 
  */
 public class DBPFEntry {
@@ -17,36 +18,19 @@ public class DBPFEntry {
 	private File filename;
 
 	// Global, this will read from DBPF File
-	private long tid;
-	private long gid;
-	private long iid;
+	private TGIKey tgiKey;
+
 	private long offset;
 	private long size;
 
 	/**
 	 * Constructor.<br>
 	 * 
-	 * @param tgi
-	 *            The TGI of this entry
+	 * @param tgiKey
+	 *            The TGI Key
 	 */
-	public DBPFEntry(long[] tgi) {
-		this(tgi[0], tgi[1], tgi[2]);
-	}
-
-	/**
-	 * Constructor.<br>
-	 * 
-	 * @param tid
-	 *            The type ID
-	 * @param gid
-	 *            The group ID
-	 * @param iid
-	 *            The instance ID
-	 */
-	public DBPFEntry(long tid, long gid, long iid) {
-		this.tid = tid;
-		this.gid = gid;
-		this.iid = iid;
+	public DBPFEntry(TGIKey tgiKey) {
+		this.tgiKey = tgiKey;
 		offset = 0;
 		size = 0;
 		filename = null;
@@ -55,10 +39,10 @@ public class DBPFEntry {
 	/**
 	 * Returns the TGI of this entry.<br>
 	 * 
-	 * @return An array with TID, GID and IID
+	 * @return The TGIKey
 	 */
-	public long[] getTGI() {
-		return new long[] { tid, gid, iid };
+	public TGIKey getTGIKey() {
+		return tgiKey;
 	}
 
 	/**
@@ -72,39 +56,20 @@ public class DBPFEntry {
 	public boolean equals(Object obj) {
 		if (obj instanceof DBPFEntry) {
 			DBPFEntry entry = (DBPFEntry) obj;
-			boolean tidOK = (entry.getTid() == tid);
-			boolean gidOK = (entry.getGid() == gid);
-			boolean iidOK = (entry.getIid() == iid);
-			if (tidOK && gidOK && iidOK) {
-				return true;
-			}
+			return tgiKey.equals(entry.getTGIKey());
 		}
 		return false;
 	}
 
 	/**
-	 * Returns a string with TGI separated by space.<br>
+	 * Returns a string with TGI separated by space, offset and size.<br>
 	 * 
 	 * @return A string
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(DBPFUtil.toHex(tid, 8));
-		sb.append(" ");
-		sb.append(DBPFUtil.toHex(gid, 8));
-		sb.append(" ");
-		sb.append(DBPFUtil.toHex(iid, 8));
-		return sb.toString();
-	}
-
-	/**
-	 * Returns a string with TGI, Offset and Size.<br>
-	 * 
-	 * @return A string
-	 */
-	public String toDetailString() {
-		StringBuffer sb = new StringBuffer(toString());
+		StringBuilder sb = new StringBuilder();
+		sb.append(tgiKey.toString());
 		sb.append("\n");
 		sb.append("Offset: ");
 		sb.append(DBPFUtil.toHex(offset, 8));
@@ -112,51 +77,6 @@ public class DBPFEntry {
 		sb.append("Size: ");
 		sb.append(size);
 		return sb.toString();
-	}
-
-	/**
-	 * @return the tid
-	 */
-	public long getTid() {
-		return tid;
-	}
-
-	/**
-	 * @param tid
-	 *            the tid to set
-	 */
-	public void setTid(long tid) {
-		this.tid = tid;
-	}
-
-	/**
-	 * @return the gid
-	 */
-	public long getGid() {
-		return gid;
-	}
-
-	/**
-	 * @param gid
-	 *            the gid to set
-	 */
-	public void setGid(long gid) {
-		this.gid = gid;
-	}
-
-	/**
-	 * @return the iid
-	 */
-	public long getIid() {
-		return iid;
-	}
-
-	/**
-	 * @param iid
-	 *            the iid to set
-	 */
-	public void setIid(long iid) {
-		this.iid = iid;
 	}
 
 	/**
