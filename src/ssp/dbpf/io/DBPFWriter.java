@@ -45,7 +45,7 @@ import ssp.dbpf.util.DBPFUtil;
  * Writes the DBPF format.<br>
  * 
  * @author Stefan Wertich, mapsonswen@web.de
- * @version 2.0.0, 09.12.2012
+ * @version 2.0.0, 14.12.2012
  * 
  */
 public class DBPFWriter {
@@ -276,6 +276,7 @@ public class DBPFWriter {
 		if (collection != null) {
 			DBPFWriter
 					.write(collection.getFilename(), collection.getTypeList());
+			return true;
 		}
 		return false;
 	}
