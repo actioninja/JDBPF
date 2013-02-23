@@ -25,9 +25,8 @@ import ssp.xtools.util.FileOp;
  */
 public class JUnitLots extends TestCase {
 
-	private File srcFolder = new File("testfiles" + File.separator
-			+ "lots");
-	
+	private File srcFolder = new File("testfiles" + File.separator + "lots");
+
 	@Test
 	public void testLots() {
 		TestUtil.printLine("TEST: Lots");
@@ -36,15 +35,19 @@ public class JUnitLots extends TestCase {
 		Vector<File> filelist = new Vector<File>();
 		XFileFilter xff = new XFileFilter("sc4lot,sc4desc,dat");
 		FileOp.listFiles(srcFolder, filelist, xff, true);
+		long t1 = System.currentTimeMillis();
 		for (File file : filelist) {
 			try {
 				check(file);
-//				Scanner sc = new Scanner(System.in)	;
-//				sc.nextLine();
+				// Scanner sc = new Scanner(System.in) ;
+				// sc.nextLine();
 			} catch (DBPFException e) {
 				fail(e.getMessage());
 			}
 		}
+		long t2 = System.currentTimeMillis();
+		TestUtil.printLine("Time to check " + filelist.size() + " files: "
+				+ (t2 - t1) / 1000 + " sec");
 	}
 
 	/**
@@ -52,7 +55,8 @@ public class JUnitLots extends TestCase {
 	 * 
 	 * @param value
 	 *            The value
-	 * @throws DBPFException Thrown, if any error occur
+	 * @throws DBPFException
+	 *             Thrown, if any error occur
 	 */
 	public void check(File file) throws DBPFException {
 		TestUtil.printLine("Check file: " + file.toString() + " ...");
@@ -61,20 +65,21 @@ public class JUnitLots extends TestCase {
 
 		TestUtil.printLine(" > Entries: " + dbpfFile.getIndexEntryCount());
 		for (DBPFEntry entry : dbpfFile.getEntryList()) {
-//			TestUtil.printLine(" > Entry: "+entry.getTGIKey().toString());
-			
+			// TestUtil.printLine(" > Entry: "+entry.getTGIKey().toString());
+
 			// SILENT CHECK
 			DBPFConverter.createType(entry);
 
 			DBPFExemplar exem = DBPFConverter.createExemplar(entry);
 			if (exem != null) {
 				DBPFProperty[] props = exem.getPropertyList();
-				TestUtil.printLine(" > Exemplar Entry: "+entry.getTGIKey().toString());
-				TestUtil.printLine(" > Exemplar Properties: "+props.length);
+//				TestUtil.printLine(" > Exemplar Entry: "
+//						+ entry.getTGIKey().toString());
+//				TestUtil.printLine(" > Exemplar Properties: " + props.length);
 				for (int i = 0; i < props.length; i++) {
 					// SILENT CHECK
 					props[i].toRaw();
-					System.out.println(props[i].toText());
+//					TestUtil.printLine(props[i].toText());
 				}
 			}
 		}

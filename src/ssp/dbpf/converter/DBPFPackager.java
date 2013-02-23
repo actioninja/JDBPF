@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 by Stefan Wertich.  All Rights Reserved.
+ * Copyright (c) 2013 by Stefan Wertich.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  * 
  * This code is free software: you can redistribute it and/or modify
@@ -29,40 +29,15 @@ import ssp.dbpf.util.DBPFUtil;
  * Handle compressed data in DBPF format.<br>
  * 
  * @author Stefan Wertich, mapsonswen@web.de
- * @version 2.0.0, 09.12.2012
+ * @version 2.0.0, 23.02.2013
  * 
  */
 public class DBPFPackager {
 
-	private long compressedSize = 0;
-	private long decompressedSize = 0;
-	private boolean compressed = false;
-
 	/**
-	 * Constructor.<br>
+	 * Private Constructor.<br>
 	 */
-	public DBPFPackager() {
-	}
-
-	/**
-	 * @return the compressedSize
-	 */
-	public long getCompressedSize() {
-		return compressedSize;
-	}
-
-	/**
-	 * @return the decompressedSize
-	 */
-	public long getDecompressedSize() {
-		return decompressedSize;
-	}
-
-	/**
-	 * @return the compressed
-	 */
-	public boolean isCompressed() {
-		return compressed;
+	private DBPFPackager() {
 	}
 
 	/**
@@ -97,8 +72,8 @@ public class DBPFPackager {
 	 * @param length
 	 *            The length
 	 */
-	private void arrayCopy2(short[] src, int srcPos, short[] dest, int destPos,
-			long length) {
+	private static void arrayCopy2(short[] src, int srcPos, short[] dest,
+			int destPos, long length) {
 		// This shouldn't occur, but to prevent errors
 		if (dest.length < destPos + length) {
 			String message = "ATTENTION!"
@@ -128,7 +103,8 @@ public class DBPFPackager {
 	 * @param length
 	 *            The length of data to copy
 	 */
-	private void offsetCopy(short[] array, int srcPos, int destPos, long length) {
+	private static void offsetCopy(short[] array, int srcPos, int destPos,
+			long length) {
 		srcPos = destPos - srcPos;
 		// This shouldn't occur, but to prevent errors
 		if (array.length < destPos + length) {
@@ -154,7 +130,21 @@ public class DBPFPackager {
 	 *            The decompressed data
 	 * @return The compressed data
 	 */
-	public short[] compress(short[] dData) {
+	public static short[] compress(short[] dData) {
+		return compress(dData, null);
+	}
+
+	/**
+	 * Compress the decompressed data.<br>
+	 * 
+	 * @param dData
+	 *            The decompressed data
+	 * @param info
+	 *            The information about compressed data in return or NULL, if
+	 *            unneeded
+	 * @return The compressed data
+	 */
+	public static short[] compress(short[] dData, DBPFPackagerInfo info) {
 		// if data is big enough for compress
 		if (dData.length > 6) {
 			// check, if data already compressed
@@ -357,7 +347,6 @@ public class DBPFPackager {
 				// write the header for the compressed data
 				// set the compressed size
 				DBPFUtil.setUint32(writeIndex, cData, 0x00, 4);
-				this.compressedSize = writeIndex;
 				// set the MAGICNUMBER
 				DBPFUtil.setUint32(DBPFConstant.MAGICNUMBER_QFS, cData, 0x04, 2);
 				// set the decompressed size
@@ -366,10 +355,11 @@ public class DBPFPackager {
 				for (int j = 0; j < revData.length; j++) {
 					cData[j + 6] = revData[2 - j];
 				}
-				this.decompressedSize = dData.length;
-				compressed = false;
-				if (compressedSize < decompressedSize) {
-					compressed = true;
+				// updates the info
+				if (info != null) {
+					info.setCompressedSize(writeIndex);
+					info.setDecompressedSize(dData.length);
+					info.setCompressed(writeIndex < dData.length);
 				}
 				// get the compressed data
 				short[] retData = new short[writeIndex];
@@ -389,14 +379,29 @@ public class DBPFPackager {
 	 *            The compressed data
 	 * @return The decompressed data
 	 */
-	public short[] decompress(short[] cData) {
-		compressed = false;
+	public static short[] decompress(short[] cData) {
+		return decompress(cData, null);
+	}
+
+	/**
+	 * Decompress the compressed data.<br>
+	 * 
+	 * If the data are not compressed, this will return the same data.
+	 * 
+	 * @param cData
+	 *            The compressed data
+	 * @param info
+	 *            The information about decompressed data in return or NULL, if
+	 *            unneeded
+	 * @return The decompressed data
+	 */
+	public static short[] decompress(short[] cData, DBPFPackagerInfo info) {
 		if (cData.length > 6) {
 			// HEADER
-			compressedSize = DBPFUtil.getUint32(cData, 0x00, 4);
+			long compressedSize = DBPFUtil.getUint32(cData, 0x00, 4);
 			int signature = (int) DBPFUtil.getUint32(cData, 0x04, 2);
 			// if not compressed
-			decompressedSize = compressedSize;
+			long decompressedSize = compressedSize;
 
 			if (signature == DBPFConstant.MAGICNUMBER_QFS) {
 				short a = (short) DBPFUtil.getUint32(cData, 0x06, 1);
@@ -420,7 +425,6 @@ public class DBPFPackager {
 				short[] dData = new short[(int) decompressedSize];
 				int dpos = 0;
 				// COMPRESSED DATA
-				compressed = true;
 				int pos = 9;
 				long control1 = 0;
 				while (control1 != 0xFC && pos < cData.length) {
@@ -494,12 +498,20 @@ public class DBPFPackager {
 						dpos += numberOfPlainText;
 						pos += numberOfPlainText;
 					}
+				} // while
+					// updates the info
+				if (info != null) {
+					info.setCompressedSize(compressedSize);
+					info.setDecompressedSize(decompressedSize);
+					info.setCompressed(true);
 				}
 				return dData;
 			}
 		}
 		// no data to decompress
-		compressed = false;
+		if (info != null) {
+			info.setCompressed(false);
+		}
 		return cData;
 	}
 }

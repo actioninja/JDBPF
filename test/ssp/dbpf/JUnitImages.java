@@ -72,13 +72,12 @@ public class JUnitImages extends TestCase {
 				+ " ...");
 		short[] rawData = DBPFReader.readRawData(file);
 
-		DBPFPackager packer = new DBPFPackager();
-		short[] cData = packer.compress(rawData);
+		short[] cData = DBPFPackager.compress(rawData);
 		File fileout1 = new File(dstFolder, "new-compressed.cpng");
 		TestUtil.printLine("Write as compressed raw data ...");
 		DBPFWriter.writeRawData(fileout1, cData);
 
-		short[] dData = packer.decompress(cData);
+		short[] dData = DBPFPackager.decompress(cData);
 		File fileout3 = new File(dstFolder,
 				"new-decompressed_from_compressed.png");
 		TestUtil.printLine("Write as decompressed raw data ...");

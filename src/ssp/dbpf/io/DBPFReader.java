@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.logging.Level;
 
 import ssp.dbpf.DBPFCollection;
@@ -203,8 +205,9 @@ public class DBPFReader {
 
 	/**
 	 * Reads the data from the file for the given entry.<br>
-	 * Opens the file, seek to offset, read and close the file when finished.
-	 * The data might be compressed! Uses RandomAccessFile for reading.
+	 * Opens the file, maps the entry content to memory, read and close the file
+	 * when finished. The data might be compressed! Uses RandomAccessFile with
+	 * MappedByteBuffer for reading.
 	 * 
 	 * @param entry
 	 *            The entry
@@ -213,13 +216,26 @@ public class DBPFReader {
 	 *             Thrown, if file not found or I/O error
 	 */
 	public static short[] readData(DBPFEntry entry) throws DBPFException {
-		short[] data = new short[(int) entry.getSize()];
 		File filename = entry.getFilename();
+		short[] data = new short[(int) entry.getSize()];
 		try {
 			RandomAccessFile raf = new RandomAccessFile(filename, "r");
-			raf.seek(entry.getOffset());
+			
+			// old version with simple seek
+//			raf.seek(entry.getOffset());
+//			for (int i = 0; i < data.length; i++) {
+//				data[i] = (short) raf.read();
+//			}
+			
+			// new version with memory map from SC4Devotion: CasperVg
+			FileChannel fc = raf.getChannel();
+			MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY,
+					entry.getOffset(), entry.getSize());
+			// System.out.println("Capacity of Buffer: "+mbb.capacity());
 			for (int i = 0; i < data.length; i++) {
-				data[i] = (short) raf.read();
+				// The get functions deliver signed byte, so this has to be
+				// converted to unsigned short
+				data[i] = (short) (mbb.get() & 0xff);
 			}
 			raf.close();
 		} catch (FileNotFoundException e) {

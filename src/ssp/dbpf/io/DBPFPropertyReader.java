@@ -36,7 +36,7 @@ import ssp.dbpf.util.DBPFLogger;
  * &lt;OPTION Value="0x00000000" Name="Other/Unknown"/&gt;
  * 
  * @author Stefan Wertich, mapsonswen@web.de
- * @version 2.0.0, 09.12.2012
+ * @version 2.0.0, 23.02.2013
  * 
  */
 public class DBPFPropertyReader {
@@ -50,8 +50,6 @@ public class DBPFPropertyReader {
 	/**
 	 * Reads the properties from default xml file.<br>
 	 * 
-	 * @param is
-	 *            The inputstream
 	 * @return The list with DBPFProperties
 	 * @throws DBPFException
 	 *             Thrown, if error occur

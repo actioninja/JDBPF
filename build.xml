@@ -1,46 +1,71 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <project name="JDBPF" default="all" basedir=".">
 
-	<echo>Build-Version: 3.4</echo>
+	<echo>Build-Version: 6.2</echo>
 	
 	<!-- ***************************************************************** -->
 	<!-- P R O P E R T I E S                                               -->
 	<!-- ***************************************************************** -->
 	<property name="targetversion" value="1.6" />
 	<property name="manifest.main-class" value=""/>
-	<property name="manifest.class-path" value=""/>
+	<property name="project.built" value="ANT"/>
 	<property name="project.version" value="2.0.0"/>
 	<property name="project.name" value="${ant.project.name}"/>
-	<property name="project.vendor" value="Stefan Wertich" />
-	<property name="copyright.message" value="Copyright &#169; 2008-2012 ${project.vendor}. All Rights Reserved."/>
+	<property name="project.vendor" value="Stefan Wertich, mapsonswen@web.de" />
+	<property name="copyright.message" value="Copyright &#169; 2008-2013 ${project.vendor}. All Rights Reserved."/>
 	<property name="build.dir" value="build/"/>
 	<property name="classes.dir" value="${build.dir}classes"/>
 	<property name="dist.dir" value="dist/"/>
 	<property name="package.dist.dir" value="dist/package/"/>
 	<property name="zip.dist.dir" value="dist/"/>
 	<property name="src.dir" value="src/"/>
-	<property name="lib.dir" value="lib/"/>
-	<property name="doc.dir" value="${build.dir}doc/"/>
+	<property name="lib.dir" value="${basedir}/../_lib/"/>
+	<property name="javadoc.dir" value="${build.dir}javadoc/"/>
 	<property name="jar.filename" value="${project.name}.jar" />
-	<property name="doc.filename" value="${project.name}-${project.version}-doc.zip" />
+	<property name="javadoc.filename" value="${project.name}-${project.version}-javadoc.zip" />
 	<property name="src.filename" value="${project.name}-${project.version}-src.zip" />
 	<property name="zip.filename" value="${project.name}-${project.version}.zip" />
+	
+	<!-- local folder where to export this project as a plugin for another project -->
+	<!--
+	<property name="export.plugin.dir" value="../GeoMapViewer3/plugins/"/>
+	-->
 	
 	<!-- ***************************************************************** -->
 	<!-- P A T H S                                                         -->
 	<!-- ***************************************************************** -->
 	
-	<!-- later this will not be necessary when the library are created -->
-	<path id="compile.classpath">
-		
+	<path id="compile.classpath">		
 		<!--
-		<fileset dir="${basedir}/${lib.dir}">
-			<include name="*.jar" />
+		<pathelement path="${basedir}/../GeoMapViewer3/bin/"/>
+		
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar"/>
+        </fileset>
+        -->
+	</path>
+	
+	<!--
+	<path id="export.classpath">
+		<fileset id="export.set1" dir="${lib.dir}">
+			<include name="XCAP.jar"/>
 		</fileset>
-		-->
+		<fileset id="export.set2" dir="${lib.dir}geotools-DWD">
+			<include name="*.jar"/>
+		</fileset>
 	</path>
 
+	<pathconvert property="manifest.class-path" pathsep=" ">
+		<path refid="export.classpath"/>
+		<mapper>
+			<chainedmapper>
+				<flattenmapper/>
+				<globmapper from="*.jar" to="lib/*.jar"/>
+			</chainedmapper>
+		</mapper>
+	</pathconvert>
+	-->
 	
 	<!-- ***************************************************************** -->
     <!-- C L E A N                                                         -->
@@ -68,8 +93,7 @@
 		<mkdir dir="${package.dist.dir}"/>
 		<mkdir dir="${zip.dist.dir}"/>
 		<mkdir dir="${classes.dir}"/>
-		<!--<mkdir dir="${lib.dir}" />-->	
-		<mkdir dir="${doc.dir}"/>
+		<mkdir dir="${javadoc.dir}"/>
 		<echo>Preparing complete!</echo>
 	</target>
 
@@ -94,19 +118,19 @@
     <!-- J A V A D O C                                                     -->
     <!-- ***************************************************************** -->
 	<target name="javadoc" depends="prepare"
-		description="Creates the API documentation using JavaDoc.">
+		description="Creates the documentation using JavaDoc.">
 		<echo>Creating the documentation ...</echo>
 		
 		<javadoc 
 			sourcepath="${src.dir}"
-			destdir="${doc.dir}" 
+			destdir="${javadoc.dir}" 
 			packagenames="*"
 			access="protected"
 			author="true"
 			version="true"
 			use="true"
-			windowtitle="${name} ${project.version} API"
-			doctitle="${name} ${project.version} API"
+			windowtitle="${project.name} ${project.version} JavaDoc"
+			doctitle="${project.name} ${project.version} JavaDoc"
 			bottom="${copyright.message}">
 			<classpath refid="compile.classpath" />
 		</javadoc>
@@ -126,23 +150,26 @@
 			destfile="${package.dist.dir}/${jar.filename}"
 			compress="true">
 			<fileset dir="${classes.dir}" />
+			<!-- Include resources into the jar file -->
 			<fileset dir="." includes="resources/**"/>
-			
 			<manifest>
 				<attribute name ="Built-By" 
-                           value="${user.name}"/>
+					value="${project.built}"/>
          		<attribute name ="Implementation-Title"
-                           value="${project.name}" />
+         			value="${project.name}" />
                 <attribute name ="Implementation-Vendor"
-                           value="${project.vendor}" />
+                	value="${project.vendor}" />
                 <attribute name ="Implementation-Version"
-                           value="${project.version} ${TIMESTAMP}" />
+                	value="${project.version} ${TIMESTAMP}" />
 				<!--
                 <attribute name="Main-Class" 
-							value="${manifest.main-class}"/>
+					value="${manifest.main-class}"/>
+				-->
+				<!--
                 <attribute name="Class-Path" 
-							value="${manifest.class-path}"/>
-							-->							
+					value="${manifest.class-path}"/>
+					-->
+							
 			</manifest>
 		</jar>		
 		<echo>Creating complete!</echo>
@@ -155,88 +182,56 @@
 		description="Handle the resources.">
 		
 		<echo>Prepare resources:</echo>
-		<!--
-		<echo>Copy API ...</echo>
-		<copy todir="${package.dist.dir}/api">
-			<fileset dir="${basedir}/api" includes="**/*.pdf" />
-		</copy>
-		-->
-		<!--
-		<echo>Copy data ...</echo>
-		<copy todir="${package.dist.dir}/data">
-			<fileset dir="${basedir}/data" />
-		</copy>
-		-->
 		
-		<!--
-		<echo>Copy images ...</echo>
-		<copy todir="${package.dist.dir}/images">
-			<fileset dir="${basedir}/images" />
+		<echo>Copy doc ...</echo>
+		<copy todir="${package.dist.dir}/doc">
+			<fileset dir="${basedir}/doc" includes="**/*.pdf" />
+			<fileset dir="${basedir}/doc" includes="**/*.txt" />
 		</copy>
-		-->
-
-		<!--
+		
+		<echo>Copy license ...</echo>
+		<copy todir="${package.dist.dir}/license">
+			<fileset dir="${basedir}/license" />
+		</copy>
+		
+		<!-- Not needed, when including to jar -->
+		<!--			
 		<echo>Copy resources ...</echo>
 		<copy todir="${package.dist.dir}/resources">
 			<fileset dir="${basedir}/resources" />
 		</copy>
 		-->
-		
-		<!--
-		<echo>Copy install ...</echo>
-		<copy todir="${package.dist.dir}/install">
-			<fileset dir="${basedir}/install" />
-		</copy>
-		-->	
-		
-		<echo>Copy other ...</echo>
-		<copy todir="${package.dist.dir}">
-			<fileset dir="${basedir}/other" />
-		</copy>
-		
-		
-		<!--
-		<echo>Copy lib ...</echo>
-		<copy todir="${package.dist.dir}/lib">
-			<path refid="compile.classpath" />
-		</copy>
-		<copy todir="${package.dist.dir}/lib">
-        	<fileset dir="${basedir}/lib" />
-        </copy>
-		-->
-		
-		<!--
-		<echo>Copy lib for XComm ...</echo>
-		<copy todir="${package.dist.dir}">
-			<fileset dir="../_lib/MemoryIO" />
-			<fileset dir="../_lib/RXTX" />
-		</copy>
-		-->
-		
-		<echo>Copy licenses ...</echo>
-		<copy todir="${package.dist.dir}">
-			<fileset dir="${basedir}/license" />
-		</copy>
 				
+		<!-- If using other libs -->
+		<!--		
+		<echo>Copy lib ...</echo>		
+		<copy todir="${package.dist.dir}/lib">
+			<fileset refid="export.set1" />
+			<fileset refid="export.set2" />
+		</copy>
+		-->
+		
 		<echo>Copy changelog ...</echo>
 		<copy todir="${package.dist.dir}" file="${basedir}/changelog.html">
 		</copy>
-		
+				
 		<!--
-		<echo>Creating Start.bat</echo>
+		<echo>Creating Start scripts</echo>		
 		<echo append="false" file="${package.dist.dir}/Start.bat" 
 			message="java -jar ${jar.filename}${line.separator}pause" />
-			-->
-		
+		<echo append="false" file="${package.dist.dir}/Start.sh" 
+			message="java -jar ${jar.filename}" />
+		-->
+
 		<echo>Preparing ressources complete</echo>
 	</target>
 	
 	<!-- ***************************************************************** -->
-    <!-- P A C K A G E                                                     -->
+    <!-- D I S T R I B U T I O N                                           -->
     <!-- ***************************************************************** -->
-	<target name="package" 
+	<target name="distribution" 
 		depends="clean,compile,javadoc,jar,resources"
-		description="Packages the distribution as a zip file.">
+		description="Package and create a distribution of zip files.">
 		
 		<echo>Creating ZIP-Distribution</echo>
 		
@@ -248,8 +243,8 @@
 		
 		<echo>Packaging the documentation (javadoc)...</echo>
 		<zip 
-			destfile="${dist.dir}/${doc.filename}" 
-			basedir="${basedir}/${doc.dir}">
+			destfile="${dist.dir}/${javadoc.filename}" 
+			basedir="${basedir}/${javadoc.dir}">
 		</zip>
 		
 		<echo>Creating ZIP-Distribution (package)...</echo>
@@ -265,14 +260,42 @@
 		<delete failonerror="false" dir="${build.dir}"/>		
 	</target>
 	
+	<!-- ***************************************************************** -->
+	<!-- P L U G I N                                                       -->
+	<!-- ***************************************************************** -->
+	<target name="export-plugin" depends="distribution" 
+		description="Create a plugin and copy to plugin directory">
+		
+		
+		<echo>Copy plugin to plugin directory</echo>		
+		<copy overwrite="true" todir="${export.plugin.dir}">
+			<fileset file="${package.dist.dir}${jar.filename}" />
+		</copy>
+		<copy overwrite="true" todir="${export.plugin.dir}license">
+			<fileset dir="${basedir}/license" />
+		</copy>
+		<copy todir="${export.plugin.dir}lib">			
+			<fileset refid="export.set1" />
+			<fileset refid="export.set2" />
+		</copy>
+		
+	</target>
+	
+	<!-- ***************************************************************** -->
+	<!-- P A C K A G E                                                     -->
+	<!-- ***************************************************************** -->
+	<target name="export-lib" depends="distribution"
+		description="Deploys the package as lib.">
+			
+		<echo>Copy distribution to _lib directory</echo>
+		<copy overwrite="true" file="${package.dist.dir}${jar.filename}" todir="${lib.dir}" />
+		<copy overwrite="true" file="${zip.dist.dir}${src.filename}" todir="${lib.dir}" />
+	</target>
+	
     <!-- ***************************************************************** -->
     <!-- A L L                                                      -->
     <!-- ***************************************************************** -->
-	<target name="all" depends="package"
-		description="Package all.">
-
-		<echo>Copy distribution to _lib directory</echo>
-	  	<copy overwrite="true" file="${package.dist.dir}${jar.filename}" todir="../_lib/" />
-		<copy overwrite="true" file="${zip.dist.dir}${src.filename}" todir="../_lib/" />
-	</target>	
+	<target name="all" depends="export-lib"
+		description="Create distribution and export it.">		
+	</target>
 </project>

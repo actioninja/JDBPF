@@ -108,8 +108,8 @@ public class DBPFConverter {
 		// System.out.println("Entry: "+entry.toString()+","+entry.getFilename());
 		// read rawdata from entry
 		short[] data = DBPFReader.readData(entry);
-		DBPFPackager packager = new DBPFPackager();
-		short[] dData = packager.decompress(data);
+		DBPFPackagerInfo info = new DBPFPackagerInfo();
+		short[] dData = DBPFPackager.decompress(data, info);
 
 		DBPFType type = null;
 		// if not only raw, try to decode the data
@@ -149,8 +149,8 @@ public class DBPFConverter {
 			((DBPFRaw) type).setData(data);
 		}
 		type.setTGIKey(tgiKey);
-		type.setCompressed(packager.isCompressed());
-		type.setDecompressedSize(packager.getDecompressedSize());
+		type.setCompressed(info.isCompressed());
+		type.setDecompressedSize(info.getDecompressedSize());
 		return type;
 	}
 
@@ -282,8 +282,7 @@ public class DBPFConverter {
 		// Compress the known files, if they were compressed,
 		// the unknown are RAW and leave as they was!!!
 		if (type.isCompressed() && (formatID != TGIKeys.RAW.getFormatID())) {
-			DBPFPackager packager = new DBPFPackager();
-			data = packager.compress(data);
+			data = DBPFPackager.compress(data);
 		}
 		return data;
 	}

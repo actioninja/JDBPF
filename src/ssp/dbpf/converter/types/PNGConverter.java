@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 by Stefan Wertich.  All Rights Reserved.
+ * Copyright (c) 2013 by Stefan Wertich.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  * 
  * This code is free software: you can redistribute it and/or modify
@@ -19,7 +19,6 @@ package ssp.dbpf.converter.types;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
@@ -37,7 +36,7 @@ import ssp.dbpf.util.DBPFUtil;
  * Converts between BufferedImage and short array.<br>
  * 
  * @author Stefan Wertich, mapsonswen@web.de
- * @version 2.0.0, 09.12.2012
+ * @version 2.0.0, 23.02.2013
  * 
  */
 public class PNGConverter {
@@ -70,13 +69,14 @@ public class PNGConverter {
 				bim = ImageIO.read(vis);
 			} catch (IOException e) {
 				throw new DBPFException(LOGNAME, "Cannot decode imageData: "
-						+ Arrays.toString(imageData) + ", ERROR: "
+						+ imageData.length + ", ERROR: "
 						+ e.getMessage());
 			}
 		}
 		if (bim == null) {
 			throw new DBPFException(LOGNAME, "Cannot decode imageData: "
-					+ Arrays.toString(imageData));
+//					+ Arrays.toString(imageData));
+					+ imageData.length);
 		}
 		type.setImage(bim);
 		return type;
@@ -100,12 +100,12 @@ public class PNGConverter {
 			if (magic.equals(DBPFConstant.MAGICNUMBER_PNG)) {
 				return imageData;
 			}
-			// Encoded data: Need to be decoded!
-			String message = "Encoded data for png image found! "
-					+ "Try to decode (length=" + imageData.length + ") ...";
-			DBPFLogger.toLog(LOGNAME, Level.WARNING, message);
-			DBPFPackager packager = new DBPFPackager();
-			return packager.decompress(imageData);
+			// Compressed data: Need to be decompress!
+			DBPFLogger.toLog(LOGNAME, Level.WARNING,
+					"Compressed data for png image found! "
+							+ "Return decompressed data (length="
+							+ imageData.length + ") ...");
+			return DBPFPackager.decompress(imageData);
 		}
 		return new short[0];
 	}

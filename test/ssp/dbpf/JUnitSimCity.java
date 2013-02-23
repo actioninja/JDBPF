@@ -17,15 +17,17 @@ import ssp.xtools.util.FileOp;
 /**
  * Tests the SimCity lots.<br>
  * 
+ * <b>For this test the SimCity files have to be in the folder
+ * 'testfiles/simcity'!</b>
+ * 
  * @author Stefan Wertich, mapsonswen@web.de
  * @version 2.0.0, 09.12.2012
  * 
  */
 public class JUnitSimCity extends TestCase {
 
-	private File srcFolder = new File("testfiles" + File.separator
-			+ "simcity");
-	
+	private File srcFolder = new File("testfiles" + File.separator + "simcity");
+
 	@Test
 	public void testLots() {
 		TestUtil.printLine("TEST: SimCity");
@@ -34,7 +36,8 @@ public class JUnitSimCity extends TestCase {
 		Vector<File> filelist = new Vector<File>();
 		XFileFilter xff = new XFileFilter("dat");
 		FileOp.listFiles(srcFolder, filelist, xff, true);
-//		File file = new File(srcFolder,"SimCity_1.dat");
+		// File file = new File(srcFolder,"SimCity_1.dat");
+		long t1 = System.currentTimeMillis();
 		for (File file : filelist) {
 			try {
 				check(file);
@@ -42,6 +45,9 @@ public class JUnitSimCity extends TestCase {
 				fail(e.getMessage());
 			}
 		}
+		long t2 = System.currentTimeMillis();
+		TestUtil.printLine("Time to check " + filelist.size() + " files: "
+				+ (t2 - t1) / 1000 + " sec");
 	}
 
 	/**
@@ -49,7 +55,8 @@ public class JUnitSimCity extends TestCase {
 	 * 
 	 * @param value
 	 *            The value
-	 * @throws DBPFException Thrown, if any error occur
+	 * @throws DBPFException
+	 *             Thrown, if any error occur
 	 */
 	public void check(File file) throws DBPFException {
 		TestUtil.printLine("Check file: " + file.toString() + " ...");
@@ -57,34 +64,34 @@ public class JUnitSimCity extends TestCase {
 		DBPFContainer dbpfFile = DBPFReader.read(file);
 
 		TestUtil.printLine(" > Entries: " + dbpfFile.getIndexEntryCount());
-//		int col = 0;
+		// int col = 0;
 		for (DBPFEntry entry : dbpfFile.getEntryList()) {
-//			col++;
-//			if (col == 80) {
-//				TestUtil.printLine("*");
-//				col=0;
-//			} else {
-//				TestUtil.print("+");
-//			}
-			
+			// col++;
+			// if (col == 80) {
+			// TestUtil.printLine("*");
+			// col=0;
+			// } else {
+			// TestUtil.print("+");
+			// }
+
 			// SILENT CHECK
 			DBPFConverter.createType(entry);
 
-//			DBPFExemplar exem = DBPFConverter.createExemplar(entry);
-//			if (exem != null) {
-//				DBPFProperty[] props = exem.getPropertyList();
-//				System.out.print(" > Properties: " + props.length);
-//				for (int i = 0; i < props.length; i++) {
-//					try {
-//						// SILENT CHECK
-//						props[i].toRaw();
-//						props[i].toText();
-//					} catch (IOException e) {
-//						fail(e.getLocalizedMessage());
-//						e.printStackTrace();
-//					}
-//				}
-//			}
+			// DBPFExemplar exem = DBPFConverter.createExemplar(entry);
+			// if (exem != null) {
+			// DBPFProperty[] props = exem.getPropertyList();
+			// System.out.print(" > Properties: " + props.length);
+			// for (int i = 0; i < props.length; i++) {
+			// try {
+			// // SILENT CHECK
+			// props[i].toRaw();
+			// props[i].toText();
+			// } catch (IOException e) {
+			// fail(e.getLocalizedMessage());
+			// e.printStackTrace();
+			// }
+			// }
+			// }
 		}
 		TestUtil.printLine("");
 		TestUtil.printLine("Check file finished.");
